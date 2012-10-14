@@ -1,0 +1,32 @@
+{
+    "name": "jakoch/PHPTracRPC",
+    "description": "PHPTracRPC is a PHP library designed to make it easy to work with the TRAC API.",
+    "version": "0.1.0",
+    "type": "library",
+    "keywords": ["trac", "rpc", "api", "json", "curl", "xml"],
+    "homepage": "http://github.com/jakoch/PHPTracRPC/",
+    "license": "GPLv2+",
+    "authors": [
+        {
+            "name": "Jens-André Koch",
+            "email": "jakoch@web.de",
+            "homepage": "http://jakoch.de",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "http://github.com/jakoch/PHPTracRPC/issues",
+        "irc": "irc://irc.freenode.net/koch"
+    },
+    "require": {
+        "php": ">=5.3.0",
+        "ext-json": "*",
+        "ext-xml": "*",
+    }
+    "autoload": {
+        "psr-0": {
+            "TracRPC\\": "lib/",
+            "TracRPCTests\\": "tests/"
+        }
+    }
+}
