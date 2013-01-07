@@ -46,7 +46,7 @@ $trac = new TracRPC(
     array('username' => 'username', 'password' => 'password')
 );
 
-// Example single call
+// Single Call Example
 $result = $trac->getTicket('32');
 if ($result === false) {
     die('ERROR: '.$trac->getErrorMessage());
@@ -54,11 +54,14 @@ if ($result === false) {
     var_dump($result);
 }
 
-// Example multi call
+// Multi Call Example
 $trac->setMultiCall(true);
+
 $ticket = $trac->getTicket('32');
 $attachments = $trac->getTicketAttachments('list', '32');
-$trac->_doRequest();
+
+$trac->doRequest();
+
 $ticket = $trac->getResponse($ticket);
 $attachments = $trac->getResonse($attachments);
 var_dump($ticket, $attachments);

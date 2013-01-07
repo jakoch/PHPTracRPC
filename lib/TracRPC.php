@@ -12,44 +12,6 @@ namespace TracRPC;
  * Trac by itself does not provide an API. Therefor the XmlRpcPlugin has to be installed.
  * Trac then provides anonymous and authenticated access to the API via two protocols XML-RPC and JSON-RPC.
  * @http://trac-hacks.org/wiki/XmlRpcPlugin/
- *
- * Example usage:
- * <code>
- * include 'tracrpc.php';
- *
- * $trac = new TracRPC(
- *     'http://trac.example.com/login/jsonrpc', array('username' => 'username', 'password' => 'password')
- * );
- *
- * // Example single call
- * $result = $trac->getTicket('32');
- * if ($result === false) {
- *   die('ERROR: '.$trac->getErrorMessage());
- * } else {
- *   var_dump($result);
- * }
- *
- * // Example multi call
- * $trac->setMultiCall(true);
- * $ticket = $trac->getTicket('32');
- * $attachments = $trac->getTicketAttachments('list', '32');
- * $trac->_doRequest();
- * $ticket = $trac->getResponse($ticket);
- * $attachments = $trac->getResonse($attachments);
- * var_dump($ticket, $attachments);
- * </code>
- *
- * @package Trac-RPC
- * @author	Brian Greenacre
- * @author  Jens-André Koch <jakoch@web.de>
- * @license GNU/GPL v2+
- *
- * Note:
- * This fork is based on "TRAC-RPC-JSON" v1.02 written by Brian Greenacre
- * originally licensed under http://www.opensource.org/licenses/artistic-license-2.0.php.
- * @link https://github.com/bgreenacre/TRAC-JSON-RPC-PHP-class
- * The code is relicensed from "Artistic License 2.0" to "GNU/GPL v2+"
- * via section 4(c)(ii) of the GNU/GPL (upstream compatibility).
  */
 class TracRPC
 {
