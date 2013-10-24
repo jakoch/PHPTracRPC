@@ -5,7 +5,7 @@
     "type": "library",
     "keywords": ["trac", "rpc", "api", "json", "curl", "xml"],
     "homepage": "http://github.com/jakoch/PHPTracRPC/",
-    "license": "GPLv2+",
+    "license": "MIT",
     "authors": [
         {
             "name": "Jens-André Koch",
@@ -21,8 +21,8 @@
     "require": {
         "php": ">=5.3.0",
         "ext-json": "*",
-        "ext-xml": "*",
-    }
+        "ext-xml": "*"
+    },
     "autoload": {
         "psr-0": {
             "TracRPC\\": "lib/",

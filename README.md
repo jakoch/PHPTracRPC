@@ -17,6 +17,7 @@ http://trac-hacks.org/wiki/XmlRpcPlugin/
 
 * PHP 5.3.0 or higher
 * The PHP Extensions "JSON" and "cURL" are required.
+* Trac with XmlRpcPlugin
 
 ### Features
 
