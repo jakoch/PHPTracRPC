@@ -1,6 +1,6 @@
 {
     "name": "jakoch/php-trac-rpc",
-    "description": "PHPTracRPC is a PHP library designed to make it easy to work with the TRAC API.",
+    "description": "PHP Trac RPC is a PHP library designed to make it easy to work with the TRAC API.",
     "version": "0.1.0",
     "type": "library",
     "keywords": ["trac", "rpc", "api", "json", "curl", "xml"],
