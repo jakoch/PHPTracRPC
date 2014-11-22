@@ -1,7 +1,5 @@
 ### TracRPC
 
-*Trac Remote Procedure Call (RPC) Library*
-
 The purpose of this class is to interact with the Trac API from a remote
 location by remote procedure calls.
 
@@ -40,15 +38,15 @@ To add PHPTracRPC as a local, per-project dependency to your project, simply add
 ### Usage
 
 ```
-include TracRPC.php';
+include 'TracRPC.php';
 
-$trac = new TracRPC(
-    'http://trac.example.com/login/jsonrpc',
-    array('username' => 'username', 'password' => 'password')
-);
+$credentials = array('username' => 'username', 'password' => 'password');
+
+$trac = new TracRPC('http://trac.example.com/login/jsonrpc', $credentials);
 
 // Single Call Example
 $result = $trac->getTicket('32');
+
 if ($result === false) {
     die('ERROR: '.$trac->getErrorMessage());
 } else {
