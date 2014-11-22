@@ -1,6 +1,6 @@
 {
     "name": "jakoch/php-trac-rpc",
-    "description": "PHP Trac RPC is a PHP library designed to make it easy to work with the TRAC API.",
+    "description": "A library to interact with a Trac Bugtracker API via remote procedure calls.",
     "version": "0.1.0",
     "type": "library",
     "keywords": ["trac", "rpc", "api", "json", "curl", "xml"],
@@ -24,9 +24,9 @@
         "ext-xml": "*"
     },
     "autoload": {
-        "psr-0": {
-            "TracRPC\\": "lib/",
-            "TracRPCTests\\": "tests/"
-        }
+        "psr-0": { "TracRPC\\": "lib/" }
+    },
+    "autoload-dev": {
+        "psr-0": { "TracRPCTests\\": "tests/" }
     }
 }
