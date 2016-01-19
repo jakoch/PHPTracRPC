@@ -1178,6 +1178,7 @@ class TracRPC
 
             $this->request = str_replace(':', ': ', $this->request);
             $this->request = str_replace(',', ', ', $this->request);
+            $this->request = str_replace('[]', '{}', $this->request);
         }
 
         if ($this->doCurlRequest() === true) {
