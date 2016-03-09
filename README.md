@@ -31,7 +31,7 @@ To add PHPTracRPC as a local, per-project dependency to your project, simply add
 
     {
         "require": {
-            "jakoch/PHPTracRPC": "dev-master"
+            "jakoch/php-trac-rpc": "dev-master"
         }
     }
 
