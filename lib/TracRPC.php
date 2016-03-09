@@ -1517,10 +1517,11 @@ class TracRPC
             if (isset($id) && is_array($id)) {
                 $ret = array();
                 foreach ($id as $key) {
-                if (false === isset($this->response[$key])) {
-                   continue;
+                    if (false === isset($this->response[$key])) {
+                       continue;
+                    }
+                    $ret[$key] = $this->response[$key];
                 }
-                $ret[$key] = $this->response[$key];
                 return $ret;
             }
         }
