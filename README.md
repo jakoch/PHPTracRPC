@@ -37,25 +37,33 @@ To add PHPTracRPC as a local, per-project dependency to your project, simply add
 
 ### Usage
 
+#### Step 1: include library
+
 When you installed via Composer, please include the Composer Autoloader first and then instantiate the TracRPC class.
+
+```
+include __DIR__.'/vendor/autoload.php';
+```
 
 When you fetched the zip file, please include the lib directly.
 
 ```
-<?php
-// setup Composer Autoloader
-include __DIR__.'/vendor/autoload.php';
+include __DIR__.'/lib/TracRPC.php';
+```
 
-// without Composer: direct include
-// include __DIR__.'/lib/TracRPC.php';
+#### Step 2: setup credentials and instantiate TracRPC
 
-// Basic Usage
-
+```
 $credentials = array('username' => 'username', 'password' => 'password');
 
 $trac = new \TracRPC\TracRPC('http://trac.example.com/login/jsonrpc', $credentials);
+```
 
-// Single Call Example
+#### Step 3: do some requests 
+
+##### Single Call Example
+
+```
 $result = $trac->getTicket('32');
 
 if ($result === false) {
@@ -63,8 +71,11 @@ if ($result === false) {
 } else {
     var_dump($result);
 }
+```
 
-// Multi Call Example
+##### Multi Call Example
+
+```
 $trac->setMultiCall(true);
 
 $ticket = $trac->getTicket('32');
