@@ -27,7 +27,7 @@ a) Download the ZIP from Github, then extract the library file and include it.
 
 b) Installation via Composer
 
-To add PHPTracRPC as a local, per-project dependency to your project, simply add a dependency on `jakoch/PHP-TracRPC` to your project's `composer.json` file.
+To add PHPTracRPC as a local, per-project dependency to your project, simply add `jakoch/php-trac-rpc` to your project's `composer.json` file.
 
     {
         "require": {
@@ -37,12 +37,23 @@ To add PHPTracRPC as a local, per-project dependency to your project, simply add
 
 ### Usage
 
+When you installed via Composer, please include the Composer Autoloader first and then instantiate the TracRPC class.
+
+When you fetched the zip file, please include the lib directly.
+
 ```
-include 'TracRPC.php';
+<?php
+// setup Composer Autoloader
+include __DIR__.'/vendor/autoload.php';
+
+// without Composer: direct include
+// include __DIR__.'/lib/TracRPC.php';
+
+// Basic Usage
 
 $credentials = array('username' => 'username', 'password' => 'password');
 
-$trac = new TracRPC('http://trac.example.com/login/jsonrpc', $credentials);
+$trac = new \TracRPC\TracRPC('http://trac.example.com/login/jsonrpc', $credentials);
 
 // Single Call Example
 $result = $trac->getTicket('32');
