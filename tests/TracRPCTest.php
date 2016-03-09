@@ -2,7 +2,7 @@
 
 namespace TracRPCTest;
 
-use TracRPC;
+use TracRPC\TracRPC;
 
 class TracRPCTest extends \PHPUnit_Framework_TestCase
 {
