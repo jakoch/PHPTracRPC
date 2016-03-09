@@ -1496,7 +1496,7 @@ class TracRPC
         if (is_object($this->response) === true) {
             return $this->response;
         } elseif (is_array($this->response) === true) {
-            if ($id === true) {
+            if ($id !== true) {
                 if (false === is_array($id)) {
                     return $this->response[$id];
                 } else {
