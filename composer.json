@@ -24,9 +24,9 @@
         "ext-xml": "*"
     },
     "autoload": {
-        "psr-0": { "TracRPC\\": "lib/" }
+        "psr-4": { "TracRPC\\": "lib/" }
     },
     "autoload-dev": {
-        "psr-0": { "TracRPCTests\\": "tests/" }
+        "psr-4": { "TracRPCTests\\": "tests/" }
     }
 }
