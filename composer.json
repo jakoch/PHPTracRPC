@@ -21,7 +21,8 @@
     "require": {
         "php": ">=5.3.0",
         "ext-json": "*",
-        "ext-xml": "*"
+        "ext-xml": "*",
+        "psr/log": "1.0.0"
     },
     "autoload": {
         "psr-4": { "TracRPC\\": "lib/" }

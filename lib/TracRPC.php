@@ -1,6 +1,9 @@
 <?php
 namespace TracRPC;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+
 /**
  * Trac Remote Procedure Call (RPC) Class
  *
@@ -27,19 +30,34 @@ class TracRPC
     private $request_id = 0;
 
     /**
+     * @var LoggerInterface
+     */
+    private $log;
+
+    /**
      * Construtor for TracRPC
      *
-     * @param	string	The complete url. Example: https://example.org/login/xmlrpc
-     * @param	array	Name/Value paired array to set properties.
+     * @param string          $tracURL The complete url. Example: https://example.org/login/xmlrpc
+     * @param array           $params  Name/Value paired array to set properties.
+     * @param LoggerInterface $l       Optional Logger object.
      */
-    public function __construct($tracURL = '', $params = array())
+    public function __construct($tracURL = '', $params = array(), LoggerInterface $l = null )
     {
+        if( $l !== null ) {
+            $this->setLogger( $l );
+        } else {
+            $this->setLogger( new NullLogger() );
+        }
+
         // CURL extension is required
         if (function_exists('curl_init') === false) {
-            throw new \BadFunctionCallException('CURL extension disabled. Please enable it in "php.ini".');
+            $msg = 'CURL extension disabled. Please enable it in "php.ini".';
+            $this->log->critical( $msg );
+            throw new \BadFunctionCallException( $msg );
         }
 
         $this->tracURL = $tracURL;
+        $this->log->debug( $tracURL );
 
         if ((array) $params === $params and count($params) > 0) {
             $this->username = isset($params['username']) ? $params['username'] : '';
@@ -47,6 +65,15 @@ class TracRPC
             $this->multiCall = isset($params['multiCall']) ? (bool) $params['multiCall'] : false;
             $this->json_decode = isset($params['json_decode']) ? (bool) $params['json_decode'] : true;
         }
+    }
+
+    /**
+     * Override the null logger.
+     *
+     * @param LoggerInterface $logger
+     */
+    public function setLogger( LoggerInterface $logger ) {
+        $this->log = $logger;
     }
 
     /**
@@ -68,9 +95,10 @@ class TracRPC
         $this->addRequest('wiki.getRecentChanges', array(array('__jsonclass__' => $date)));
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
-        
+
         if ($this->doRequest() === true) {
             return $this->getResponse();
         }
@@ -107,6 +135,7 @@ class TracRPC
         }
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -135,6 +164,7 @@ class TracRPC
         }
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -155,6 +185,7 @@ class TracRPC
         $this->addRequest('wiki.getAllPages');
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -182,6 +213,7 @@ class TracRPC
         $this->addRequest('ticket.getRecentChanges', array(array('__jsonclass__' => $date)));
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -201,19 +233,22 @@ class TracRPC
     public function getTicket($id = '')
     {
         if ($id == '') {
+            $this->log->error( __METHOD__ . ' called with no ticket id' );
             return false;
         }
 
+        $this->log->debug( 'Gettig ticket', ['ticket'=>$id] );
         $this->addRequest('ticket.get', $id);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
         if ($this->doRequest() === true) {
             return $this->getResponse();
         }
-
+        $this->log->error( 'doRequest failed' );
         return false;
     }
 
@@ -227,6 +262,7 @@ class TracRPC
         $this->addRequest('ticket.getTicketFields');
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -253,6 +289,7 @@ class TracRPC
         $this->addRequest('ticket.changeLog', array($id, $when));
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -278,6 +315,7 @@ class TracRPC
         $this->addRequest('ticket.getActions', $id);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -353,6 +391,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -432,6 +471,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -481,6 +521,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -539,6 +580,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -593,6 +635,7 @@ class TracRPC
         $this->addRequest('ticket.query', $query);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -655,6 +698,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -717,6 +761,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -779,6 +824,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -841,6 +887,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -903,6 +950,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -964,6 +1012,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1025,6 +1074,7 @@ class TracRPC
         $this->addRequest($method, $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1047,6 +1097,7 @@ class TracRPC
         if ($this->doRequest() === true) {
             return $this->getResponse();
         } elseif ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1077,6 +1128,7 @@ class TracRPC
         $this->addRequest('search.getSearchFilters', $params);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1102,6 +1154,7 @@ class TracRPC
         $this->addRequest('wiki.wikiToHTML', $text);
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1122,6 +1175,7 @@ class TracRPC
         $this->addRequest('search.getSearchFilters');
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1142,6 +1196,7 @@ class TracRPC
         $this->addRequest('system.getAPIVersion');
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Returning request id, multicall is enabled', ['id'=>$this->request_id] );
             return $this->request_id;
         }
 
@@ -1166,10 +1221,12 @@ class TracRPC
         }
 
         if (empty($this->request)) {
+            $this->log->error( 'No request is set to be done' );
             return false;
         }
 
         if ($this->multiCall === true) {
+            $this->log->debug( 'Adding system.multicall request' );
             $this->addRequest('system.multicall');
         }
 
@@ -1216,6 +1273,7 @@ class TracRPC
         }
 
         if (empty($id)) {
+            $this->log->debug( 'Incrementing request_id' );
             $id = $this->incrementRequestId();
         }
 
@@ -1234,6 +1292,8 @@ class TracRPC
                 'id' => $id
             );
         }
+
+        $this->log->debug( "Added $method request", ['id'=>$this->request_id] );
 
         return true;
     }
@@ -1257,11 +1317,15 @@ class TracRPC
     private function doCurlRequest()
     {
         if (empty($this->tracURL)) {
-            exit('Provide the URL to the Trac Env you want to query.');
+            $msg = 'Provide the URL to the Trac Env you want to query.';
+            $this->log->critical( $msg );
+            exit( $msg );
         }
 
         if (empty($this->request)) {
-            exit('No valid Request.');
+            $msg = 'No valid Request.';
+            $this->log->critical( $msg );
+            exit( $msg );
         }
 
         $ch = curl_init();
@@ -1298,10 +1362,12 @@ class TracRPC
          *      http://trac.example.com/login/xmlrpc
          */
         if (strpos($this->tracURL, 'jsonrpc') !== false) {
+            $this->log->debug( 'Setting json content type for request' );
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         }
 
         if (strpos($this->tracURL, 'xmlrpc') !== false) {
+            $this->log->debug( 'Setting xml content type for request' );
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
         }
 
@@ -1329,26 +1395,40 @@ class TracRPC
          */
         if (strpos($this->tracURL, 'login') !== false) {
             if (empty($this->username) or empty($this->password)) {
-                throw new \Exception(
-                    'You are trying an authenticated access without providing username and password.'
-                );
+                $msg = 'You are trying an authenticated access without providing username and password.';
+                $this->log->critical( $msg );
+                throw new \Exception( $msg );
             } else {
+                $this->log->debug( 'Setting authentication parameters for curl' );
                 curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY); // CURLAUTH_BASIC | CURLAUTH_DIGEST
                 curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
             }
         }
 
+        $starttime = microtime( true );
+        $this->log->debug( 'Issuing request' );
         $response = trim(curl_exec($ch));
+        $endtime = microtime( true );
 
         if (curl_errno($ch) > 0) {
+            $this->log->error( 'Curl encountered an error', [curl_error( $ch ) ] );
             $this->error = curl_error($ch);
+        } else {
+            $total_time = number_format( $endtime - $starttime, 4 );
+            $this->log->debug( 'Response recieved', [ "{$total_time}s" ] );
         }
 
         curl_close($ch);
 
         if ($this->json_decode === true) {
+            $this->log->debug( 'Decoding json response' );
             $this->response = json_decode($response);
+            if( $this->response === null && json_last_error() !== JSON_ERROR_NONE) {
+                $this->log->error( 'json decode encountered an error' );
+                $this->log->error( json_last_error_msg(), [json_last_error()] );
+            }
         } else {
+            $this->log->debug( 'json_decode is set to false, not decoding' );
             $this->response = $response;
         }
 
@@ -1498,7 +1578,7 @@ class TracRPC
         // response is an object
         if (is_object($this->response)) {
             return $this->response;
-        } 
+        }
 
         // response is an array
         if (is_array($this->response)) {
