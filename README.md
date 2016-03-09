@@ -1,5 +1,10 @@
 ### TracRPC
 
+[![Latest Stable Version](https://poser.pugx.org/jakoch/php-trac-rpc/version.png)](https://packagist.org/packages/jakoch/php-trac-rpc)
+[![Total Downloads](https://poser.pugx.org/jakoch/php-trac-rpc/d/total.png)](https://packagist.org/packages/jakoch/php-trac-rpc)
+[![Build Status](https://travis-ci.org/jakoch/PHPTracRPC.png)](https://travis-ci.org/jakoch/PHPTracRPC)
+[![License](https://poser.pugx.org/jakoch/php-trac-rpc/license.png)](https://packagist.org/packages/jakoch/php-trac-rpc)
+
 The purpose of this class is to interact with the Trac API from a remote
 location by remote procedure calls.
 
