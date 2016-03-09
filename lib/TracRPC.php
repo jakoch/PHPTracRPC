@@ -67,11 +67,12 @@ class TracRPC
 
         $this->addRequest('wiki.getRecentChanges', array(array('__jsonclass__' => $date)));
 
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
         if ($this->multiCall === true) {
             return $this->request_id;
+        }
+        
+        if ($this->doRequest() === true) {
+            return $this->getResponse();
         }
 
         return false;
