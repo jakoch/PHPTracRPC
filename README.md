@@ -88,6 +88,35 @@ $attachments = $trac->getResonse($attachments);
 var_dump($ticket, $attachments);
 ```
 
+### Request Methods
+
+1. getRecentChangedWikiPages($date = 0)
+2. getWikiPage($name = '', $version = 0, $raw = true)
+3. getWikiPageInfo($name = '', $version = 0)
+4. getWikiPages()
+5. getRecentChangedTickets($date = 0)
+6. getTicket($id = '')
+7. getTicketFields()
+8. getTicketChangelog($id = '', $when = 0)
+9. getTicketActions($id = '')
+10. getWikiAttachments($action = 'list', $name = '', $file = '')
+11. getTicketAttachments($action = 'list', $id = '', $file = '', $desc = '', $replace = true)
+12. getWikiUpdate($action = 'create', $name = '', $page = '', $data = array())
+13. getTicketUpdate($action = 'create', $id = '', $data = array())
+14. getTicketSearch($query = '')
+15. getTicketComponent($action = 'get_all', $name = '', $attr = array())
+16. getTicketMilestone($action = 'get_all', $name = '', $attr = array())
+17. getTicketPriority($action = 'get_all', $name = '', $attr = '')
+18. getTicketResolution($action = 'get_all', $name = '', $attr = '')
+19. getTicketSeverity($action = 'get_all', $name = '', $attr = '')
+20. getTicketType($action = 'get_all', $name = '', $attr = '')
+21. getTicketVersion($action = 'get_all', $name = '', $attr = array())
+22. getTicketStatus()
+23. getSearch($query = '', $filter = array())
+24. getWikiTextToHTML($text = '')
+25. getSearchFilters()
+26. getApiVersion()
+
 ### Example: Ajax Request to Trac's JSON-RPC Interface
 
 ```
