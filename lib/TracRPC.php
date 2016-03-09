@@ -1244,7 +1244,8 @@ class TracRPC
      */
     private function incrementRequestId()
     {
-        return $this->request_id + 1;
+        $this->request_id++;
+        return $this->request_id;
     }
 
     /**
