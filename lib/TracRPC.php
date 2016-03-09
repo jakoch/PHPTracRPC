@@ -1490,36 +1490,42 @@ class TracRPC
     /**
      * Get the response from the request.
      *
-     * @param	int		The id of the call.
+     * @param  mixed|int|array  The id of the call (or an array of ids).
      * @return object stdClass
      */
     public function getResponse($id = false)
     {
-        if (is_object($this->response) === true) {
+        // response is an object
+        if (is_object($this->response)) {
             return $this->response;
-        } elseif (is_array($this->response) === true) {
-            if ($id === true) {
-                if (false === is_array($id)) {
-                    return $this->response[$id];
-                } else {
-                    $ret = array();
+        } 
 
-                    foreach ($id as $key) {
-                        if (false === isset($this->response[$key])) {
-                            continue;
-                        }
+        // response is an array
+        if (is_array($this->response)) {
 
-                        $ret[$key] = $this->response[$key];
-                    }
-
-                    return $ret;
-                }
-            } else {
+            // response is an array - but no id requested
+            if($id === false) {
                 return current($this->response);
             }
-        } else {
-            return false;
+
+            // response is an array - with id requested
+            if (isset($id) && is_int($id)) {
+                return $this->response[$id];
+            }
+
+            // response is an array - with an array of id's requested
+            if (isset($id) && is_array($id)) {
+                $ret = array();
+                foreach ($id as $key) {
+                if (false === isset($this->response[$key])) {
+                   continue;
+                }
+                $ret[$key] = $this->response[$key];
+                return $ret;
+            }
         }
+
+        return false;
     }
 
     /**
