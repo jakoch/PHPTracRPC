@@ -21,7 +21,9 @@ class TracRPC
     public $password = '';
     public $multiCall = false;
     public $json_decode = true;
+    public $content_type = '';
     public $error = '';
+    
     private $request = false;
     private $response = false;
     private $request_id = 0;
@@ -46,6 +48,7 @@ class TracRPC
             $this->password = isset($params['password']) ? $params['password'] : '';
             $this->multiCall = isset($params['multiCall']) ? (bool) $params['multiCall'] : false;
             $this->json_decode = isset($params['json_decode']) ? (bool) $params['json_decode'] : true;
+            $this->content_type = isset($params['content-type']) ? $params['content-type'] : 'json';
         }
     }
 
@@ -1297,11 +1300,13 @@ class TracRPC
          *      http://trac.example.com/login/rpc
          *      http://trac.example.com/login/xmlrpc
          */
-        if (strpos($this->tracURL, 'jsonrpc') !== false) {
+        // if URL ends with "/rpc" we can not differentiate between XML and JSON for the content-type.
+        // you need to define "content-type" in $params or via setter. it defaults to "json".
+        if (strpos($this->tracURL, '/rpc') !== false) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->content_type));
+        } elseif (strpos($this->tracURL, 'jsonrpc') !== false) { 
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        }
-
-        if (strpos($this->tracURL, 'xmlrpc') !== false) {
+        } elseif (strpos($this->tracURL, 'xmlrpc') !== false) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
         }
 
@@ -1473,6 +1478,20 @@ class TracRPC
         $this->multiCall = ($multi === true) ? true : false;
 
         return $this->multiCall;
+    }
+    
+    /**
+     * Set the content-type.
+     * Only needed for URLs using "/rpc".
+     * 
+     * @param string The content-type. Defaults to json.
+     * @return object TracRPC
+     */
+    public function setContentType($type = 'json')
+    {
+        $this->content_type = $type;
+        
+        return $this;
     }
 
     /**
