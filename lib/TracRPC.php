@@ -23,7 +23,7 @@ class TracRPC
     public $json_decode = true;
     public $content_type = '';
     public $error = '';
-    
+
     private $request = false;
     private $response = false;
     private $request_id = 0;
@@ -73,7 +73,7 @@ class TracRPC
         if ($this->multiCall === true) {
             return $this->request_id;
         }
-        
+
         if ($this->doRequest() === true) {
             return $this->getResponse();
         }
@@ -1179,9 +1179,7 @@ class TracRPC
         // json_encode $this->_request
         if (is_array($this->request) === true) {
             $this->request = json_encode(array_pop($this->request));
-
-            $this->request = str_replace(':', ': ', $this->request);
-            $this->request = str_replace(',', ', ', $this->request);
+            // Replace empty arrays with structs(objects, in PHP parlance)
             $this->request = str_replace('[]', '{}', $this->request);
         }
 
@@ -1304,7 +1302,7 @@ class TracRPC
         // you need to define "content-type" in $params or via setter. it defaults to "json".
         if (strpos($this->tracURL, '/rpc') !== false) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->content_type));
-        } elseif (strpos($this->tracURL, 'jsonrpc') !== false) { 
+        } elseif (strpos($this->tracURL, 'jsonrpc') !== false) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         } elseif (strpos($this->tracURL, 'xmlrpc') !== false) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
@@ -1479,18 +1477,18 @@ class TracRPC
 
         return $this->multiCall;
     }
-    
+
     /**
      * Set the content-type.
      * Only needed for URLs using "/rpc".
-     * 
+     *
      * @param string The content-type. Defaults to json.
      * @return object TracRPC
      */
     public function setContentType($type = 'json')
     {
         $this->content_type = $type;
-        
+
         return $this;
     }
 
@@ -1517,7 +1515,7 @@ class TracRPC
         // response is an object
         if (is_object($this->response)) {
             return $this->response;
-        } 
+        }
 
         // response is an array
         if (is_array($this->response)) {
