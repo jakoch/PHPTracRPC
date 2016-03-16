@@ -34,8 +34,8 @@ class TracRPC
     /**
      * Construtor for TracRPC
      *
-     * @param	string $tracURL The complete url. Example: https://example.org/login/jsonrpc
-     * @param	array	 $params  Name/Value paired array to set properties.
+     * @param  string $tracURL The complete url. Example: https://example.org/login/jsonrpc
+     * @param  array  $params  Name/Value paired array to set properties.
      */
     public function __construct($tracURL = '', $params = array())
     {
@@ -60,7 +60,7 @@ class TracRPC
      *
      * Trac API -> wiki.getRecentChanges()
      *
-     * @param	int $date A timestamp integer. Defaults to current day.
+     * @param  int $date A timestamp integer. Defaults to current day.
      * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getRecentChangedWikiPages($date = 0)
