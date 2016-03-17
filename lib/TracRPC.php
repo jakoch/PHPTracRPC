@@ -16,23 +16,26 @@ namespace TracRPC;
 class TracRPC
 {
 
-    public $tracURL = '';
-    public $username = '';
-    public $password = '';
-    public $multiCall = false;
-    public $json_decode = true;
+    public $tracURL      = '';
+    public $username     = '';
+    public $password     = '';
+    public $multiCall    = false;
+    public $json_decode  = true;
     public $content_type = '';
-    public $error = '';
+    public $error        = '';
 
-    private $request = false;
-    private $response = false;
+    /**
+     * @var bool|array
+     */
+    private $request    = false;
+    private $response   = false;
     private $request_id = 0;
 
     /**
      * Construtor for TracRPC
      *
-     * @param	string	The complete url. Example: https://example.org/login/xmlrpc
-     * @param	array	Name/Value paired array to set properties.
+     * @param  string $tracURL The complete url. Example: https://example.org/login/jsonrpc
+     * @param  array  $params  Name/Value paired array to set properties.
      */
     public function __construct($tracURL = '', $params = array())
     {
@@ -57,8 +60,8 @@ class TracRPC
      *
      * Trac API -> wiki.getRecentChanges()
      *
-     * @param	int		A timestamp integer. Defaults to current day.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  int $date A timestamp integer. Defaults to current day.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getRecentChangedWikiPages($date = 0)
     {
@@ -68,26 +71,18 @@ class TracRPC
             $date = array('datetime', date("o-m-d\TH:i:s+00:00", $date));
         }
 
-        $this->addRequest('wiki.getRecentChanges', array(array('__jsonclass__' => $date)));
+        $this->_addRequest( 'wiki.getRecentChanges', array(array('__jsonclass__' => $date)));
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get a wiki page in it's RAW format or HTML. Can get a version of a page.
      *
-     * @param	string	Wiki page name.
-     * @param	int		Version of the page to get.
-     * @param	bool	true gets raw wiki page. false will return HTML.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $name    Wiki page name.
+     * @param  int    $version Version of the page to get.
+     * @param  bool   $raw     true gets raw wiki page. false will return HTML.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getWikiPage($name = '', $version = 0, $raw = true)
     {
@@ -97,33 +92,27 @@ class TracRPC
 
         if ($version == 0) {
             if ($raw === true) {
-                $this->addRequest('wiki.getPage', array($name));
+                $this->_addRequest( 'wiki.getPage', array($name));
             } else {
-                $this->addRequest('wiki.getPageHTML', array($name));
+                $this->_addRequest( 'wiki.getPageHTML', array($name));
             }
         } else {
             if ($raw === true) {
-                $this->addRequest('wiki.getPageVersion', array($name, $version));
+                $this->_addRequest( 'wiki.getPageVersion', array($name, $version));
             } else {
-                $this->addRequest('wiki.getPageHTMLVersion', array($name, $version));
+                $this->_addRequest( 'wiki.getPageHTMLVersion', array($name, $version));
             }
         }
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get page info for a specific wiki page and possible version of the page.
      *
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param string $name
+     * @param int    $version
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getWikiPageInfo($name = '', $version = 0)
     {
@@ -132,47 +121,31 @@ class TracRPC
         }
 
         if ($version == 0) {
-            $this->addRequest('wiki.getPageInfo', array($name));
+            $this->_addRequest( 'wiki.getPageInfo', array($name));
         } else {
-            $this->addRequest('wiki.getPageInfoVersion', array($name, $version));
+            $this->_addRequest( 'wiki.getPageInfoVersion', array($name, $version));
         }
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get a list of wiki pages in TRAC.
      *
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getWikiPages()
     {
-        $this->addRequest('wiki.getAllPages');
+        $this->_addRequest( 'wiki.getAllPages');
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get the recent changed tickets.
      *
-     * @param	int		A timestamp integer. Defaults to current day.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	int $date A timestamp integer. Defaults to current day.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getRecentChangedTickets($date = 0)
     {
@@ -182,24 +155,16 @@ class TracRPC
             $date = array('datetime', date("o-m-d\TH:i:s+00:00", $date));
         }
 
-        $this->addRequest('ticket.getRecentChanges', array(array('__jsonclass__' => $date)));
+        $this->_addRequest( 'ticket.getRecentChanges', array(array('__jsonclass__' => $date)));
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get a ticket.
      *
-     * @param	string	The id of the ticket.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	string $id The id of the ticket.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicket($id = '')
     {
@@ -207,45 +172,29 @@ class TracRPC
             return false;
         }
 
-        $this->addRequest('ticket.get', $id);
+        $this->_addRequest( 'ticket.get', $id);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get a all ticket fields.
      *
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketFields()
     {
-        $this->addRequest('ticket.getTicketFields');
+        $this->_addRequest( 'ticket.getTicketFields');
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get the recent changed tickets.
      *
-     * @param	string	The id of the ticket.
-     * @param	int		When in the changelog.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $id   The id of the ticket.
+     * @param  int    $when When in the changelog.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketChangelog($id = '', $when = 0)
     {
@@ -253,24 +202,16 @@ class TracRPC
             return false;
         }
 
-        $this->addRequest('ticket.changeLog', array($id, $when));
+        $this->_addRequest( 'ticket.changeLog', array($id, $when));
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get a ticket actions.
      *
-     * @param	string	The id of the ticket.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	string $id The id of the ticket.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketActions($id = '')
     {
@@ -278,33 +219,25 @@ class TracRPC
             return false;
         }
 
-        $this->addRequest('ticket.getActions', $id);
+        $this->_addRequest( 'ticket.getActions', $id);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Perform requests relating to attachments for wiki pages.
-     *
+
      * Get a list of attachments for a wiki page.
      * Get an attachment for a wiki page.
      * Delete an attachment for a wiki page.
      * Creat an attachment for a wiki page.
      *
-     * @param	string	What action to perform for ticket attachments.
-     * 					Possible values list, get, delete, or create.
-     * 					Default list.
-     * @param	string	The pagename of the wiki page.
-     * @param	string	Filenamepath of the file to add to the wiki page.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for ticket attachments.
+     *                        Possible values list, get, delete, or create.
+     *                        Default list.
+     * @param  string $name   The pagename of the wiki page.
+     * @param  string $file   Filenamepath of the file to add to the wiki page.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getWikiAttachments($action = 'list', $name = '', $file = '')
     {
@@ -312,7 +245,6 @@ class TracRPC
             return false;
         }
 
-        $method = '';
         $params = array($name);
 
         switch ($action) {
@@ -353,35 +285,27 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Perform requests relating to attachments for tickets.
-     *
+
      * Get a list of attachments for a ticket.
      * Get an attachment for a ticket.
      * Delete an attachment for a ticket.
-     * Creat an attachment for a ticket.
+     * Create an attachment for a ticket.
      *
-     * @param	string	What action to perform for ticket attachments.
-     * 					Possible values list, get, delete, or create.
-     * 					Default list.
-     * @param	string	The id of the ticket.
-     * @param	string	Filenamepath of the file to add to the ticket.
-     * @param	string	Description of the attachment.
-     * @param	bool	true will replace the attachment if it exists false will not replace it.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action  What action to perform for ticket attachments.
+     *                         Possible values list, get, delete, or create.
+     *                         Default list.
+     * @param  string $id      The id of the ticket.
+     * @param  string $file    Filenamepath of the file to add to the ticket.
+     * @param  string $desc    Description of the attachment.
+     * @param  bool   $replace true will replace the attachment if it exists false will not replace it.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketAttachments($action = 'list', $id = '', $file = '', $desc = '', $replace = true)
     {
@@ -389,7 +313,6 @@ class TracRPC
             return false;
         }
 
-        $method = '';
         $params = array($id);
 
         switch ($action) {
@@ -432,29 +355,21 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Create or delete a wiki page.
      *
-     * @param	string	What action to perform for a ticket.
-     * 					Possible values create or delete.
-     * 					Default create.
-     * @param	string	The pagename of the wiki page.
-     * @param	string	The content of the wiki page to set.
-     * @param	array	Name/value paired array of data for the wiki page.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for a ticket.
+     *                        Possible values create or delete.
+     *                        Default create.
+     * @param  string $name   The pagename of the wiki page.
+     * @param  string $page   The content of the wiki page to set.
+     * @param  array  $data   Name/value paired array of data for the wiki page.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getWikiUpdate($action = 'create', $name = '', $page = '', $data = array())
     {
@@ -462,53 +377,39 @@ class TracRPC
             return false;
         }
 
-        $method = '';
-        $params = array();
-
         switch ($action) {
             case 'create':
             default:
                 $method = 'wiki.putPage';
                 $params = array(
-                                                            0 => $name,
-                                                            1 => $page,
-                                                            2 => $data
+                    0 => $name,
+                    1 => $page,
+                    2 => $data,
                 );
-                break;
+            break;
             case 'delete':
                 $method = 'wiki.deletePage';
                 $params = $name;
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Create, delete, or update a ticket.
      *
-     * @param	string	What action to perform for a ticket.
-     * 					Possible values create, update, or delete.
-     * 					Default create.
-     * @param	string	The id of the ticket.
-     * @param	array	Name/value paired array of data for the ticket.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for a ticket.
+     *                        Possible values create, update, or delete.
+     *                        Default create.
+     * @param  string $id     The id of the ticket.
+     * @param  array  $data   Name/value paired array of data for the ticket.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketUpdate($action = 'create', $id = '', $data = array())
     {
-        $method = '';
-        $params = array();
-
         switch ($action) {
             case 'create':
             default:
@@ -539,24 +440,16 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Search for tickets.
      *
-     * @param	string	Query string to search.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	string|array $query Query string to search.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketSearch($query = '')
     {
@@ -593,33 +486,26 @@ class TracRPC
             return false;
         }
 
-        $this->addRequest('ticket.query', $query);
+        $this->_addRequest( 'ticket.query', $query);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket components, get a specific component,
      * create a component, edit an existing component, or delete a component.
      *
-     * @param	string	What action to perform for ticket component.
-     * 					Possible values get_all, get, delete, update, or create.
-     * 					Default get_all.
-     * @param	string	The name of the component.
-     * @param	array	Name/value paired array of data for the ticket component.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for ticket component.
+     *                        Possible values get_all, get, delete, update, or
+     *                        create. Default get_all.
+     * @param  string $name   The name of the component.
+     * @param  array  $attr   Name/value paired array of data for the ticket
+     *                        component.
+     * @return mixed The result of the request or the integer id on a multicall.
+     *               false on error.
      */
     public function getTicketComponent($action = 'get_all', $name = '', $attr = array())
     {
-        $method = '';
         $params = '';
 
         switch ($action) {
@@ -651,37 +537,28 @@ class TracRPC
                 }
 
                 $method = 'ticket.component.' . $action;
-                $params = array($name, $attrs);
+                $params = array($name, $attr);
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket milestones, get a specific milestone,
      * create a milestone, edit an existing milestone, or delete a milestone.
      *
-     * @param	string	What action to perform for ticket milestone.
+     * @param	string $action What action to perform for ticket milestone.
      * 					Possible values get_all, get, delete, update, or create.
      * 					Default get_all.
-     * @param	string	The name of the milestone.
-     * @param	array	Name/value paired array of data for the ticket milestone.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	string $name The name of the milestone.
+     * @param	array $attr Name/value paired array of data for the ticket milestone.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketMilestone($action = 'get_all', $name = '', $attr = array())
     {
-        $method = '';
         $params = '';
 
         switch ($action) {
@@ -717,33 +594,24 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket prioritys, get a specific priority,
      * create a priority, edit an existing priority, or delete a priority.
      *
-     * @param	string	What action to perform for ticket priority.
+     * @param	string $action What action to perform for ticket priority.
      * 					Possible values get_all, get, delete, update, or create.
      * 					Default get_all.
-     * @param	string	The name of the priority.
-     * @param	string	Priority name.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	string $name The name of the priority.
+     * @param	string $attr Priority name.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketPriority($action = 'get_all', $name = '', $attr = '')
     {
-        $method = '';
         $params = '';
 
         switch ($action) {
@@ -779,33 +647,24 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket resolutions, get a specific resolution,
      * create a resolution, edit an existing resolution, or delete a resolution.
      *
-     * @param	string	What action to perform for ticket resolution.
+     * @param	string $action What action to perform for ticket resolution.
      * 					Possible values get_all, get, delete, update, or create.
      * 					Default get_all.
-     * @param	string	The name of the resolution.
-     * @param	string	Resolution name.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param	string $name The name of the resolution.
+     * @param	string $attr Resolution name.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketResolution($action = 'get_all', $name = '', $attr = '')
     {
-        $method = '';
         $params = '';
 
         switch ($action) {
@@ -841,33 +700,24 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket severitys, get a specific severity,
      * create a severity, edit an existing severity, or delete a severity.
      *
-     * @param	string	What action to perform for ticket severity.
-     * 					Possible values get_all, get, delete, update, or create.
-     * 					Default get_all.
-     * @param	string	The name of the severity.
-     * @param	string	Severity name.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for ticket severity.
+     *                        Possible values get_all, get, delete, update, or create.
+     *                        Default get_all.
+     * @param  string $name   The name of the severity.
+     * @param  string $attr   Severity name.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketSeverity($action = 'get_all', $name = '', $attr = '')
     {
-        $method = '';
         $params = '';
 
         switch ($action) {
@@ -903,32 +753,23 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket types, get a specific type, create a type, edit an existing type, or delete a type
      *
-     * @param	string	What action to perform for ticket type.
-     * 					Possible values get_all, get, delete, update, or create.
-     * 					Default get_all.
-     * @param	string	The name of the type.
-     * @param	string	Type name.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for ticket type.
+     *                        Possible values get_all, get, delete, update, or create.
+     *                        Default get_all.
+     * @param  string $name   The name of the type.
+     * @param  string $attr   Type name.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketType($action = 'get_all', $name = '', $attr = '')
     {
-        $method = '';
         $params = '';
 
         switch ($action) {
@@ -964,33 +805,24 @@ class TracRPC
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all ticket versions, get a specific version,
      * create a version, edit an existing version, or delete a version.
      *
-     * @param	string	What action to perform for ticket version.
-     * 					Possible values get_all, get, delete, update, or create.
-     * 					Default get_all.
-     * @param	string	The name of the version.
-     * @param	array	Name/value paired array of data for the ticket version.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $action What action to perform for ticket version.
+     *                        Possible values get_all, get, delete, update, or create.
+     *                        Default get_all.
+     * @param  string $name   The name of the version.
+     * @param  array  $attr   Name/value paired array of data for the ticket version.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketVersion($action = 'get_all', $name = '', $attr = array())
     {
-        $method = '';
         $params = array();
 
         switch ($action) {
@@ -1021,47 +853,33 @@ class TracRPC
                     return false;
                 }
 
-                $this->set_method('ticket.version.' . $action);
+                $method = ('ticket.version.' . $action);
                 break;
         }
 
-        $this->addRequest($method, $params);
+        $this->_addRequest( $method, $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all status.
      *
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getTicketStatus()
     {
-        $this->addRequest('ticket.status.getAll');
+        $this->_addRequest( 'ticket.status.getAll');
 
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        } elseif ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        return false;
+        $this->_getReturnValue();
     }
 
     /**
      * Perform a global search in TRAC.
      *
-     * @param	string	Query string to search for,
-     * @param	array	Search filters to use.
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @param  string $query  Query string to search for,
+     * @param  array  $filter Search filters to use.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getSearch($query = '', $filter = array())
     {
@@ -1077,24 +895,16 @@ class TracRPC
             $params[1] = $filter;
         }
 
-        $this->addRequest('search.getSearchFilters', $params);
+        $this->_addRequest( 'search.getSearchFilters', $params);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Convert a string of raw wiki text to HTML.
      *
-     * @param	string	A string of raw wiki text.
-     * @return mixed The result of the requet or the integer id on a multi_call. false on error.
+     * @param	string $text A string of raw wiki text.
+     * @return mixed The result of the request or the integer id on a multi_call. false on error.
      */
     public function getWikiTextToHTML($text = '')
     {
@@ -1102,70 +912,46 @@ class TracRPC
             return false;
         }
 
-        $this->addRequest('wiki.wikiToHTML', $text);
+        $this->_addRequest( 'wiki.wikiToHTML', $text);
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get all search filter
      *
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getSearchFilters()
     {
-        $this->addRequest('search.getSearchFilters');
+        $this->_addRequest( 'search.getSearchFilters');
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Get the API version from Trac.
      *
-     * @return mixed The result of the requet or the integer id on a muli_call. false on error.
+     * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
     public function getApiVersion()
     {
-        $this->addRequest('system.getAPIVersion');
+        $this->_addRequest( 'system.getAPIVersion');
 
-        if ($this->multiCall === true) {
-            return $this->request_id;
-        }
-
-        if ($this->doRequest() === true) {
-            return $this->getResponse();
-        }
-
-        return false;
+        return $this->_getReturnValue();
     }
 
     /**
      * Executes a RPC request to Trac. Accepts method and arguments.
      *
-     * @param	string	A RPC method to execute.
-     * @param	array	Arguments to pass with the RPC call.
+     * @param  string $method A RPC method to execute.
+     * @param  array  $args   Arguments to pass with the RPC call.
      * @return bool true on a successful request. false on error.
      */
     public function doRequest($method = '', $args = array())
     {
         if ($method != '') {
-            $this->addRequest($method, $args);
+            $this->_addRequest( $method, $args);
         }
 
         if (empty($this->request)) {
@@ -1173,7 +959,7 @@ class TracRPC
         }
 
         if ($this->multiCall === true) {
-            $this->addRequest('system.multicall');
+            $this->_addRequest( 'system.multicall');
         }
 
         // json_encode $this->_request
@@ -1183,7 +969,7 @@ class TracRPC
             $this->request = str_replace('[]', '{}', $this->request);
         }
 
-        if ($this->doCurlRequest() === true) {
+        if ($this->_doCurlRequest() === true) {
             $this->parseResult();
 
             return true;
@@ -1195,12 +981,12 @@ class TracRPC
     /**
      * Adds a new request to the request stack
      *
-     * @param	string	The method name to call.
-     * @param	array	Arguments to pass with the call.
-     * @param	string	The id to set to the call.
+     * @param  string $method The method name to call.
+     * @param  array  $args   Arguments to pass with the call.
+     * @param  string $id     The id to set to the call.
      * @return bool Always true.
      */
-    private function addRequest($method = '', $args = array(), $id = '')
+    protected function _addRequest( $method = '', $args = array(), $id = '')
     {
         if ($method == '') {
             return false;
@@ -1217,7 +1003,7 @@ class TracRPC
         }
 
         if (empty($id)) {
-            $id = $this->incrementRequestId();
+            $id = $this->_incrementRequestId();
         }
 
         if ($method == 'system.multicall') {
@@ -1244,7 +1030,7 @@ class TracRPC
      *
      * @return int The incremented request id.
      */
-    private function incrementRequestId()
+    protected function _incrementRequestId()
     {
         $this->request_id++;
         return $this->request_id;
@@ -1254,8 +1040,9 @@ class TracRPC
      * Make the request using CURL.
      *
      * @return bool true is a successful CURL request. false CURL isn't installed or the url or payload is empty.
+     * @throws \Exception If making an authenticated request without authentication
      */
-    private function doCurlRequest()
+    protected function _doCurlRequest()
     {
         if (empty($this->tracURL)) {
             exit('Provide the URL to the Trac Env you want to query.');
@@ -1366,6 +1153,7 @@ class TracRPC
      * proper php values. For datetime types, the value is converted into a UNIX
      * timestamp. Base64 decodes the value.
      *
+     * @param array|object $response
      * @return bool true on a non-empty result and false if it is empty.
      */
     public function parseResult($response = array())
@@ -1433,6 +1221,7 @@ class TracRPC
     /**
      * Set the property user.
      *
+     * @param string $username
      * @return object TracRPC
      */
     public function setUser($username = '')
@@ -1445,6 +1234,7 @@ class TracRPC
     /**
      * Set the property password.
      *
+     * @param string $password
      * @return object TracRPC
      */
     public function setPassword($password = '')
@@ -1457,6 +1247,7 @@ class TracRPC
     /**
      * Set the property tracURL
      *
+     * @param string $tracURL
      * @return object TracRPC
      */
     public function setTracURL($tracURL = '')
@@ -1469,6 +1260,7 @@ class TracRPC
     /**
      * Set the property multiCall.
      *
+     * @param bool $multi
      * @return bool
      */
     public function setMultiCall($multi = false)
@@ -1482,7 +1274,7 @@ class TracRPC
      * Set the content-type.
      * Only needed for URLs using "/rpc".
      *
-     * @param string The content-type. Defaults to json.
+     * @param string $type The content-type. Defaults to json.
      * @return object TracRPC
      */
     public function setContentType($type = 'json')
@@ -1495,6 +1287,7 @@ class TracRPC
     /**
      * Set the property json_decode.
      *
+     * @param bool $json_decode
      * @return object TracRPC
      */
     public function setJsonDecode($json_decode = false)
@@ -1549,12 +1342,12 @@ class TracRPC
     /**
      * Get any error message set for the request.
      *
-     * @param	bool	The id of the call made. Used for multiCalls.
+     * @param	bool|array $id The id of the call made. Used for multiCalls.
      * @return string The error message
      */
     public function getErrorMessage($id = false)
     {
-        if ($id === true) {
+        if ($id) {
             if (is_array($id) === true) {
                 $ret = array();
 
@@ -1575,5 +1368,26 @@ class TracRPC
         }
 
         return $this->error;
+    }
+
+    /**
+     * Get the appropriate return value.
+     *
+     * Returns an integer (the request id) when multicall is enabled, an object
+     * representing the last response if the request was successful, and false on
+     * failure.
+     *
+     * @return boolean|integer|object
+     */
+    protected function _getReturnValue() {
+        if( $this->multiCall === true ) {
+            return $this->request_id;
+        }
+
+        if( $this->doRequest() === true ) {
+            return $this->getResponse();
+        }
+
+        return false;
     }
 }
