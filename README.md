@@ -24,7 +24,7 @@ http://trac-hacks.org/wiki/XmlRpcPlugin/
 
 ### Features
 
-* Make Requests to the TRAC API
+* Make Requests to the TRAC API using the following [request methods](https://github.com/jakoch/PHPTracRPC/blob/master/README.md#request-methods).
 
 ### Installation
 
