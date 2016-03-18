@@ -176,7 +176,7 @@ class TracRPC
     public function getTicket($id = '')
     {
         if ($id === '') {
-            return false;
+            throw new \InvalidArgumentException('Parameter $id is empty.');
         }
 
         $this->_addRequest( 'ticket.get', $id);
@@ -374,11 +374,11 @@ class TracRPC
      *                        Possible values create or delete.
      *                        Default create.
      * @param  string $name   The pagename of the wiki page.
-     * @param  string $page   The content of the wiki page to set.
+     * @param  string $pageContent   The content of the wiki page to set.
      * @param  array  $data   Name/value paired array of data for the wiki page.
      * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
-    public function getWikiUpdate($action = 'create', $name = '', $page = '', $data = array())
+    public function getWikiUpdate($action = 'create', $name = '', $pageContent = '', $data = array())
     {
         if ($name === '') {
             throw new \InvalidArgumentException('Parameter $name empty.');
@@ -390,7 +390,7 @@ class TracRPC
                 $method = 'wiki.putPage';
                 $params = array(
                     0 => $name,
-                    1 => $page,
+                    1 => $pageContent,
                     2 => $data,
                 );
             break;
@@ -988,6 +988,8 @@ class TracRPC
             $this->_addRequest( 'system.multicall');
         }
 
+        // @todo encode request for json or xml request
+        
         // json_encode $this->_request
         if (is_array($this->request) === true) {
             $this->request = json_encode(array_pop($this->request));
@@ -996,12 +998,16 @@ class TracRPC
         }
 
         if ($this->_doCurlRequest() === true) {
-            $this->parseResult();
+            
+            if ($this->json_decode === true) {
+                $this->response = json_decode($this->response);
+                $this->parseResult();
+            }  
 
             return true;
-        } else {
-            return false;
-        }
+        } 
+        
+        return false;
     }
 
     /**
@@ -1111,6 +1117,10 @@ class TracRPC
         if (empty($this->request)) {
             throw new \InvalidArgumentException('No valid Request. Check the request parameters.');
         }
+        
+        if (empty($this->content_type)) {
+            throw new \InvalidArgumentException('Please set the content type (xml or json) for this request.');
+        }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->tracURL);
@@ -1155,21 +1165,13 @@ class TracRPC
             }
         }
 
-        $response = trim(curl_exec($ch));
-
-        //var_dump($response);
+        $this->response = trim(curl_exec($ch));
         
         if (curl_errno($ch) > 0) {
             $this->error = curl_error($ch);
         }
 
         curl_close($ch);
-
-        if ($this->json_decode === true) {
-            $this->response = json_decode($response);
-        } else {
-            $this->response = $response;
-        }
 
         return true;
     }
@@ -1186,7 +1188,7 @@ class TracRPC
      * @return bool true on a non-empty result and false if it is empty.
      */
     public function parseResult($response = array())
-    {
+    {       
         if (empty($response)) {
             $response = $this->getResponse();
 
@@ -1366,6 +1368,11 @@ class TracRPC
                 return $ret;
             }
         }
+        
+        // raw json string, not decoded
+        if(is_string($this->response)) {
+            return $this->response;
+        }
 
         return false;
     }
@@ -1416,7 +1423,7 @@ class TracRPC
             return $this->request_id;
         }
 
-        if( $this->doRequest() === true ) {
+        if( $this->doRequest() === true ) {            
             return $this->getResponse();
         }
 

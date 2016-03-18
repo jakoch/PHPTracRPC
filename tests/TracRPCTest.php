@@ -42,13 +42,17 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         unset($this->trac);
     }
  
-    public function test_Constructor_RPC_Request_Without_ContentType()
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_Constructor_RPC_Request_Without_ContentType_throwsException()
     {
         $url = $this->tracURL.'rpc';
-        $this->trac = new TracRPC($url);         
-        $response = $this->trac->getApiVersion();
+        $this->trac = new TracRPC($url);
+        $this->assertEmpty($this->trac->content_type);
         
-        $this->assertSame("No protocol matching Content-Type 'application/' at path '/rpc'", $response);
+        $response = $this->trac->getApiVersion();        
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_Constructor_RPC_Request_With_Set_ContentType_JSON()
@@ -64,10 +68,14 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     
     public function test_Constructor_RPC_Request_With_Set_ContentType_XML()
     {
+        $this->markTestIncomplete(
+          'This test was skipped, because the XMLRPC handling is not implemented yet.'
+        );
+                
         $url = $this->tracURL.'rpc';
         $this->trac = new TracRPC($url);
-        $this->trac->setContentType('xml');   
-        
+        $this->trac->setContentType('xml'); 
+                
         $response = $this->trac->getApiVersion();
        
         $this->assertNotNull($response);
@@ -89,6 +97,10 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     
     public function test_Constructor_XMLRPC_Request()
     {
+        $this->markTestIncomplete(
+          'This test was skipped, because the XMLRPC handling is not implemented yet.'
+        );
+        
         $url = $this->tracURL.'xmlrpc';
         $this->trac = new TracRPC($url); 
         $response = $this->trac->getApiVersion();       
@@ -154,9 +166,7 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $url = $this->tracURL.'jsonrpc';
         $this->trac = new TracRPC($url);         
         $this->trac->setJsonDecode(false);
-        $response = $this->trac->getApiVersion();
-        var_dump($response);     
-        $this->assertFalse($response);        
+        $response = $this->trac->getApiVersion();      
         $this->assertSame('{"id": 1, "result": [1, 1, 5], "error": null}', $response);
     }
 
@@ -166,20 +176,17 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
      */
     public function test_Constructor_TestLoginWithoutCredentials()
     {        
-        $this->trac = new TracRPC($this->tracURL . 'login/jsonrpc');
-        
+        $this->trac = new TracRPC($this->tracURL . 'login/jsonrpc');        
         $response = $this->trac->getWikiPage('HackIndex');
-        //var_dump($response);
-        unset($response);
+        
+        $this->assertTrue(false); // this should fail with invalid login 
     }
 
     public function test_Constructor_doRequest()
     {
-        $response = $this->trac->getWikiPage('HackIndex');  
-        
+        $response = $this->trac->getWikiPage('HackIndex');          
         $this->assertNotNull($response);
         $this->assertTrue(is_string($response));        
-        unset($response);
     }
     
     public function test_MultiCall_Request()
@@ -281,44 +288,38 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_GetTicketMilestone_GetALL()
     {
         $response = $this->trac->getTicketMilestone();
-        //var_dump($response);
         $this->assertNotNull($response);
         $this->assertTrue(is_array($response));
-        $this->assertTrue(array_key_exists('Triage | Neuzuteilung',array_flip($response)));
-        unset($response);
     }
 
-    public function test_GetTicketMilestone_GetOne()
+    public function test_GetTicketMilestone_Get()
     {
+        $this->markTestIncomplete('This test requires a login.');
+        
         $response = $this->trac->getTicketMilestone('get', 'Release');
-
         $this->assertNotNull($response);
         $this->assertTrue(is_object($response));
-        $responseArray = self::objectToArray($response);
-        $this->assertContains('Gettext', $responseArray['description']);
-        unset($response);
     }
     
     /**
      * @expectedException InvalidArgumentException
      */
-    public function test_GetTicketMilestone_GetOne_emptyName_throwsException()
+    public function test_GetTicketMilestone_Get_emptyName_throwsException()
     {
         $name = '';
         $response = $this->trac->getTicketMilestone('get', $name);
-        //$this->expectException('\InvalidArgumentException');
+        $this->expectException('\InvalidArgumentException');
     }
 
-    public function test_GetTicketMilestone_GetOne_GetDatetime()
-    {
-        $response = $this->trac->getTicketMilestone('get', 'Clansuite 0.2.2');
+    public function test_GetTicketMilestone_Get_GetDatetime()
+    {               
+        $response = $this->trac->getTicketMilestone('get', '0.8');
 
         $this->assertNotNull($response);
         $this->assertTrue(is_object($response));
         $responseArray = self::objectToArray($response);
         // datetime contains a string like "012-02-17T17:00:00"
         $this->assertContains('T', $responseArray['due']['1']);
-        unset($response);
     }
     
     /**
@@ -327,8 +328,8 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_getTicket_emptyID_throwsException()
     {
         $id = '';
-        $response = $this->trac->getTicket($id);              
-        //$this->expectException('\InvalidArgumentException');
+        $response = $this->trac->getTicket($id);         
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getTicket()
@@ -354,11 +355,14 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Priority', $response['6']['label']);
     }
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function test_getTicketChangelog_empty_name_throwsException()
     {
         $id = ''; $when = 0;
         $response = $this->trac->getTicketChangelog($id, $when);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getTicketChangelog()
@@ -368,11 +372,14 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($response);
     }
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function test_getTicketActions_empty_name_throwsException()
     {
         $id = '';
         $response = $this->trac->getTicketActions($id);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getTicketActions()
@@ -382,35 +389,43 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($response);
     }
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function test_getWikiAttachments_empty_name_throwsException()
     {
         $action = 'list'; $name = ''; $file = 'avatar.gif';
         $response = $this->trac->getWikiAttachments($action, $name, $file);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }    
    
-    public function test_getWikiAttachments_action_get_empty_file_throwsException()
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_getWikiAttachments_Get_empty_file_throwsException()
     {
         $action = 'get'; $name = 'abc'; $file = '';
         $response = $this->trac->getWikiAttachments($action, $name, $file);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getWikiAttachments()
     {
         $action = 'list'; $name = 'WikiStart'; $file = 'avatar.gif';
         $response = $this->trac->getWikiAttachments($action, $name, $file);
-        //var_dump($response);
         $this->assertNotNull($response);
     }
     
     // ##### Ticket #####
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function test_getTicketAttachments_empty_id_throwsException()
     {
         $action = 'list'; $id = ''; $file = ''; $desc = ''; $replace = true;
         $response = $this->trac->getTicketAttachments($action, $id, $file, $desc, $replace);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getTicketAttachments()
@@ -420,24 +435,33 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($response);
     }
     
-    public function test_getTicketAttachments_action_get_empty_file_throwsException()
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_getTicketAttachments_Get_empty_file_throwsException()
     {
         $action = 'get'; $id = '10000'; $file = ''; $desc = ''; $replace = true;
         $response = $this->trac->getTicketAttachments($action, $id, $file, $desc, $replace);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function test_getWikiUpdate_empty_name_throwsException()
     {
         $action = 'create'; $name = ''; $page = ''; $data = array();
         $response = $this->trac->getWikiUpdate($action, $name, $page, $data);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getWikiUpdate()
     {
-        $action = 'create'; $name = 'HackIndex'; $page = ''; $data = array();
-        $response = $this->trac->getWikiUpdate($action, $name, $page, $data);
+        $this->markTestIncomplete('This test requires a login.');
+        
+        $action = 'create'; $name = 'HackIndex'; $pageContent = ''; $data = array();
+        $response = $this->trac->getWikiUpdate($action, $name, $pageContent, $data);
+        
         $this->assertNotNull($response);
     }
     
@@ -458,14 +482,7 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $response = $this->trac->getRecentChangedTickets(time());
         $this->assertNotNull($response);
     }
-
-    /*public function getWikiUpdate()
-    {    
-        //$action = 'create', $name = '', $page = '', $data = array()
-        $response = $this->trac->getWikiUpdate($action, $name, $page, $data);
-        $this->assertNotNull($response);
-    }*/
-    
+   
     public function test_getApiVersion()
     {
         $response =  $this->trac->getApiVersion();
@@ -486,10 +503,10 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     
     public function test_getWikiTextToHTML()
     {
+        $this->markTestIncomplete('This test requires a login.');
+        
         $text = '= test_header =';
         $response = $this->trac->getWikiTextToHTML($text); 
-        var_dump($response);
-        $this->assertNotNull($response); 
         $this->assertEquals("<h1 id=\"test_header\">test_header</h1>", $response);        
     }
     
@@ -509,11 +526,14 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($response); 
     }
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function test_getTicketVersion_empty_name_throwsException()
     {
         $action = 'get'; $name = ''; $attr = array();
         $response = $this->trac->getTicketVersion($action, $name, $attr);
-        $this->expectException();
+        $this->expectException('\InvalidArgumentException');
     }
     
     public function test_getTicketStatus()
