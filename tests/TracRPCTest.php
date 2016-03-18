@@ -67,17 +67,11 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     }
     
     public function test_Constructor_RPC_Request_With_Set_ContentType_XML()
-    {
-        $this->markTestIncomplete(
-          'This test was skipped, because the XMLRPC handling is not implemented yet.'
-        );
-                
+    {                
         $url = $this->tracURL.'rpc';
         $this->trac = new TracRPC($url);
-        $this->trac->setContentType('xml'); 
-                
-        $response = $this->trac->getApiVersion();
-       
+        $this->trac->setContentType('xml');                 
+        $response = $this->trac->getApiVersion();       
         $this->assertNotNull($response);
         $this->assertTrue(is_array($response));
     }
