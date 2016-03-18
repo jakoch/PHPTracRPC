@@ -9,8 +9,8 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     /**
      * We use a public Trac server for testing the requests. No mocks.
      */
-    private $tracURL = 'https://trac-hacks.org/';    
-    //private $tracURL = 'https://josm.openstreetmap.de/';
+    //private $tracURL = 'https://trac-hacks.org/';    
+    private $tracURL = 'https://josm.openstreetmap.de/';
          
     /**
      * @var TracRPC\TracRPC (subject under test)
@@ -177,14 +177,14 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_Constructor_TestLoginWithoutCredentials()
     {        
         $this->trac = new TracRPC($this->tracURL . 'login/jsonrpc');        
-        $response = $this->trac->getWikiPage('HackIndex');
+        $response = $this->trac->getWikiPage('TracGuide');
         
         $this->assertTrue(false); // this should fail with invalid login 
     }
 
     public function test_Constructor_doRequest()
     {
-        $response = $this->trac->getWikiPage('HackIndex');          
+        $response = $this->trac->getWikiPage('TracGuide');          
         $this->assertNotNull($response);
         $this->assertTrue(is_string($response));        
     }
@@ -231,34 +231,34 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_getWikiPage()
     {
         // raw true = HTML
-        $name = 'HackIndex'; $version = '6'; $raw = true;
+        $name = 'TracGuide'; $version = '3'; $raw = true;
         $response = $this->trac->getWikiPage($name, $version, $raw);
         $this->assertNotNull($response);        
-        $this->assertContains('= Trac Hacks', $response);
+        $this->assertContains('= The Trac User and Administration Guide =', $response);
         
         // raw false = non HTML
-        $name = 'HackIndex'; $version = '6'; $raw = false;
+        $name = 'TracGuide'; $version = '3'; $raw = false;
         $response = $this->trac->getWikiPage($name, $version, $raw);
         $this->assertNotNull($response);
-        $this->assertContains('<h1 id="TracHacks">Trac Hacks', $response);
+        $this->assertContains('<html><body><h1 id="TheTracUserandAdministrationGuide">', $response);
                               
         // wiki.getPage
-        $name = 'HackIndex'; $version = '0'; $raw = true;
+        $name = 'TracGuide'; $version = '0'; $raw = true;
         $response = $this->trac->getWikiPage($name, $version, $raw);
         $this->assertNotNull($response);
-        $this->assertContains('= Trac Hacks', $response); 
+        $this->assertContains('= The Trac User and Administration Guide =', $response); 
         
         // wiki.getPageHTML
-        $name = 'HackIndex'; $version = '0'; $raw = false;
+        $name = 'TracGuide'; $version = '0'; $raw = false;
         $response = $this->trac->getWikiPage($name, $version, $raw);
         $this->assertNotNull($response);
-        $this->assertContains('<html><body><h1 id="TracHacks">Trac Hacks</h1>', $response); 
+        $this->assertContains('<html><body><h1 id="TheTracUserandAdministrationGuide">', $response); 
         
         // wiki.getPageVersion
-        $name = 'HackIndex'; $version = '2'; $raw = true;
+        $name = 'TracGuide'; $version = '2'; $raw = true;
         $response = $this->trac->getWikiPage($name, $version, $raw);
         $this->assertNotNull($response);
-        $this->assertContains('= Trac Hacks', $response);       
+        $this->assertContains('= The Trac User and Administration Guide =', $response);       
     }
     
     /**
@@ -275,12 +275,12 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_getWikiPageInfo()
     {
         // wiki.getPageInfo
-        $name = 'HackIndex'; $version = 0;
+        $name = 'TracGuide'; $version = 0;
         $response = $this->trac->getWikiPageInfo($name, $version);
         $this->assertNotNull($response);
         
         // wiki.getPageInfoVersion
-        $name = 'HackIndex'; $version = 1;
+        $name = 'TracGuide'; $version = 1;
         $response = $this->trac->getWikiPageInfo($name, $version);
         $this->assertNotNull($response);        
     }
@@ -312,12 +312,8 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     }
 
     public function test_GetTicketMilestone_Get_GetDatetime()
-    {               
-         $this->markTestIncomplete(
-          'This test was skipped, because this Trac endpoint doesn\'t have any milestones.'             
-        );
-         
-        $response = $this->trac->getTicketMilestone('get', 'XXX');
+    {   
+        $response = $this->trac->getTicketMilestone('get', '16.02');
 
         $this->assertNotNull($response);
         $this->assertTrue(is_object($response));
@@ -342,7 +338,8 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $response = $this->trac->getTicket($id);
               
         $this->assertNotNull($response);
-        $this->assertEquals('Allow to edit the screenshot before attaching', $response['3']['summary']);
+        $this->assertEquals('closed', $response['3']['status']);
+        $this->assertEquals('remove access=designated and access=official from presets', $response['3']['summary']);
     }
     
     public function test_getTicketSeverity($action = 'get_all', $name = '', $attr = '')
@@ -463,7 +460,7 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     {
         $this->markTestIncomplete('This test requires a login.');
         
-        $action = 'create'; $name = 'HackIndex'; $pageContent = ''; $data = array();
+        $action = 'create'; $name = 'TracGuide'; $pageContent = ''; $data = array();
         $response = $this->trac->getWikiUpdate($action, $name, $pageContent, $data);
         
         $this->assertNotNull($response);
@@ -499,10 +496,9 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_getWikiPages()
     {
         $response = $this->trac->getWikiPages(); // getAllPages
-        
         $this->assertNotNull($response); 
         $this->assertNotEquals(0, count($response));
-        $this->assertSame('WikiExtrasPlugin', $response[0]);
+        $this->assertSame('Bg:VersionHistory', $response[0]);
     }
     
     public function test_getWikiTextToHTML()
@@ -549,18 +545,14 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_getSearch()
     {
         // without filter
-        $query = 'screenshot';
-        $filter = '';
-        $response = $this->trac->getSearch($query, $filter);
-        
+        $query = 'screenshot'; $filter = '';
+        $response = $this->trac->getSearch($query, $filter);        
         $this->assertNotNull($response); 
         $this->assertTrue(is_array($response));
         
         // with filter
-        $query = 'screenshot';
-        $filter = 'wiki';
-        $response = $this->trac->getSearch($query, $filter);
-        
+        $query = 'screenshot'; $filter = 'tickets';
+        $response = $this->trac->getSearch($query, $filter);        
         $this->assertNotNull($response); 
         $this->assertTrue(is_array($response));
     }
