@@ -987,23 +987,35 @@ class TracRPC
         if ($this->multiCall === true) {
             $this->_addRequest( 'system.multicall');
         }
-
-        // @todo encode request for json or xml request
         
-        // json_encode $this->_request
-        if (is_array($this->request) === true) {
+        // create JSON request
+        if (is_array($this->request) === true & $this->content_type === 'json') {
             $this->request = json_encode(array_pop($this->request));
             // Replace empty arrays with structs(objects, in PHP parlance)
             $this->request = str_replace('[]', '{}', $this->request);
         }
+        
+        // create XML request
+        if ($this->content_type === 'xml') {
+            if(!extension_loaded('xmlrpc')) {
+                throw new \RuntimeException('PHP Extension "xmlrpc" is required. Please activate in php.ini.');                
+            }
+            
+            $this->request = \xmlrpc_encode_request($this->request[0]['method'], $this->request[0]['params']);
+        }
 
         if ($this->_doCurlRequest() === true) {
             
-            if ($this->json_decode === true) {
+            if($this->content_type === 'xml') {
+                //var_dump($this->response);
+                $this->response = \xmlrpc_decode($this->response);
+                //var_dump($this->response);
+            } 
+            elseif ($this->content_type === 'json' && $this->json_decode === true) {
                 $this->response = json_decode($this->response);
                 $this->parseResult();
             }  
-
+            
             return true;
         } 
         
@@ -1198,7 +1210,11 @@ class TracRPC
         if (false === is_object($response) and false === is_array($response)) {
             return false;
         }
-
+        
+        if (($response->result !== null) and is_array($response->result) && $this->content_type === 'xml') {
+            return; // single call on xml for now
+        }
+                
         if (($response->result !== null) and is_array($response->result)) {
             foreach ($response->result as $key => $resp) {
                 if (isset($resp->result) === true) {
@@ -1345,6 +1361,10 @@ class TracRPC
 
         // response is an array
         if (is_array($this->response)) {
+            
+            if($this->content_type === 'xml') { // @todo this returns a single response for now
+                return $this->response;
+            }
 
             // response is an array - but no id requested
             if($id === false) {
