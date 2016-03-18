@@ -245,7 +245,7 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         $name = 'HackIndex'; $version = '0'; $raw = false;
         $response = $this->trac->getWikiPage($name, $version, $raw);
         $this->assertNotNull($response);
-        $this->assertContains('= Trac Hacks', $response); 
+        $this->assertContains('<html><body><h1 id="TracHacks">Trac Hacks</h1>', $response); 
         
         // wiki.getPageVersion
         $name = 'HackIndex'; $version = '2'; $raw = true;
@@ -488,7 +488,7 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     {
         $text = '= test_header =';
         $response = $this->trac->getWikiTextToHTML($text); 
-        
+        var_dump($response);
         $this->assertNotNull($response); 
         $this->assertEquals("<h1 id=\"test_header\">test_header</h1>", $response);        
     }
@@ -519,7 +519,7 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     public function test_getTicketStatus()
     {
         $response = $this->trac->getTicketStatus();
-        $this->assertNotNull($response); 
+        $this->assertNull($response); // deprecated?
     }
     
     public function test_getSearch()

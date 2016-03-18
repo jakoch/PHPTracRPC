@@ -94,7 +94,7 @@ class TracRPC
     public function getWikiPage($name = '', $version = 0, $raw = true)
     {
         if ($name === '') {
-            throw new \InvalidArgumentException("Parameter $name is empty. Please specify the WikiPage name you want to fetch.");
+            throw new \InvalidArgumentException('Parameter $name is empty. Please specify the WikiPage name you want to fetch.');
         }
 
         if ($version == 0) {
@@ -124,7 +124,7 @@ class TracRPC
     public function getWikiPageInfo($name = '', $version = 0)
     {
         if ($name === '') {
-            throw new \InvalidArgumentException("Parameter $name is empty. Please specify the WikiPage name you want to fetch.");
+            throw new \InvalidArgumentException('Parameter $name is empty. Please specify the WikiPage name you want to fetch.');
         }
 
         if ($version == 0) {
@@ -206,7 +206,7 @@ class TracRPC
     public function getTicketChangelog($id = '', $when = 0)
     {
         if ($id === '') {
-            throw new \InvalidArgumentException("Parameter $id empty.");
+            throw new \InvalidArgumentException('Parameter $id empty.');
         }
 
         $this->_addRequest( 'ticket.changeLog', array($id, $when));
@@ -223,7 +223,7 @@ class TracRPC
     public function getTicketActions($id = '')
     {
         if ($id === '') {
-            throw new \InvalidArgumentException("Parameter $id empty.");
+            throw new \InvalidArgumentException('Parameter $id empty.');
         }
 
         $this->_addRequest( 'ticket.getActions', $id);
@@ -249,7 +249,7 @@ class TracRPC
     public function getWikiAttachments($action = 'list', $name = '', $file = '')
     {
         if ($name === '') {
-            throw new \InvalidArgumentException("Parameter $name empty.");
+            throw new \InvalidArgumentException('Parameter $name empty.');
         }
 
         $params = array($name);
@@ -261,7 +261,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($file === '') {
-                    throw new \InvalidArgumentException("Parameter $file empty.");
+                    throw new \InvalidArgumentException('Parameter $file empty.');
                 }
 
                 $method = 'wiki.getAttachment';
@@ -269,7 +269,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($file === '') {
-                    throw new \InvalidArgumentException("Parameter $file empty.");
+                    throw new \InvalidArgumentException('Parameter $file empty.');
                 }
 
                 $method = 'wiki.deleteAttachment';
@@ -317,7 +317,7 @@ class TracRPC
     public function getTicketAttachments($action = 'list', $id = '', $file = '', $desc = '', $replace = true)
     {
         if ($id === '') {
-            throw new \InvalidArgumentException("Parameter $id empty.");
+            throw new \InvalidArgumentException('Parameter $id empty.');
         }
 
         $params = array($id);
@@ -329,7 +329,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($file === '') {
-                    throw new \InvalidArgumentException("Parameter $file empty.");
+                    throw new \InvalidArgumentException('Parameter $file empty.');
                 }
 
                 $method = 'ticket.getAttachment';
@@ -337,7 +337,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($file === '') {
-                    throw new \InvalidArgumentException("Parameter $file empty.");
+                    throw new \InvalidArgumentException('Parameter $file empty.');
                 }
 
                 $method = 'ticket.deleteAttachment';
@@ -381,7 +381,7 @@ class TracRPC
     public function getWikiUpdate($action = 'create', $name = '', $page = '', $data = array())
     {
         if ($name === '') {
-            throw new \InvalidArgumentException("Parameter $name empty.");
+            throw new \InvalidArgumentException('Parameter $name empty.');
         }
 
         switch ($action) {
@@ -439,7 +439,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($id === '') {
-                    throw new \InvalidArgumentException("Parameter $id empty.");
+                    throw new \InvalidArgumentException('Parameter $id empty.');
                 }
 
                 $method = 'ticket.delete';
@@ -522,7 +522,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty.");
+                    throw new \InvalidArgumentException('Parameter $name empty.');
                 }
 
                 $method = 'ticket.component.get';
@@ -540,10 +540,10 @@ class TracRPC
             case 'update':
             case 'create':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty.");
+                    throw new \InvalidArgumentException('Parameter $name empty.');
                 }
                 if (!is_array($attr)) {
-                    throw new \InvalidArgumentException("Parameter $attr empty.");
+                    throw new \InvalidArgumentException('Parameter $attr empty.');
                 }
 
                 $method = 'ticket.component.' . $action;
@@ -578,7 +578,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a milestone.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a milestone.');
                 }
 
                 $method = 'ticket.milestone.get';
@@ -587,7 +587,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a milestone.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a milestone.');
                 }
 
                 $method = 'ticket.milestone.delete';
@@ -631,7 +631,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a priority.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a priority.');
                 }
 
                 $method = 'ticket.priority.get';
@@ -640,7 +640,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a priority.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a priority.');
                 }
 
                 $method = 'ticket.priority.delete';
@@ -649,10 +649,10 @@ class TracRPC
             case 'update':
             case 'create':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a priority.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a priority.');
                 }
                 if ($attr === '') {
-                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a priority.");
+                    throw new \InvalidArgumentException('Parameter $attr empty. Please specify a priority.');
                 }
 
                 $method = 'ticket.priority.' . $action;
@@ -687,7 +687,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a resolution.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a resolution.');
                 }
 
                 $method = 'ticket.resolution.get';
@@ -696,7 +696,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a resolution.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a resolution.');
                 }
 
                 $method = 'ticket.resolution.delete';
@@ -705,10 +705,10 @@ class TracRPC
             case 'update':
             case 'create':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a resolution.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a resolution.');
                 }
                 if ($attr === '') {
-                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify attributes.");
+                    throw new \InvalidArgumentException('Parameter $attr empty. Please specify attributes.');
                 }
 
                 $method = 'ticket.resolution.' . $action;
@@ -743,7 +743,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a severity.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a severity.');
                 }
 
                 $method = 'ticket.severity.get';
@@ -752,7 +752,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a severity.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a severity.');
                 }
 
                 $method = 'ticket.severity.delete';
@@ -761,10 +761,10 @@ class TracRPC
             case 'update':
             case 'create':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a severity.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a severity.');
                 }
                 if ($attr === '') {
-                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a severity.");
+                    throw new \InvalidArgumentException('Parameter $attr empty. Please specify a severity.');
                 }
 
                 $method = 'ticket.severity.' . $action;
@@ -798,7 +798,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a type.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a type.');
                 }
 
                 $method = 'ticket.type.get';
@@ -807,7 +807,7 @@ class TracRPC
                 break;
             case 'delete':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a type.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a type.');
                 }
 
                 $method = 'ticket.type.delete';
@@ -816,10 +816,10 @@ class TracRPC
             case 'update':
             case 'create':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a type.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a type.');
                 }
                 if ($attr === '') {
-                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a type.");
+                    throw new \InvalidArgumentException('Parameter $attr empty. Please specify a type.');
                 }
 
                 $method = 'ticket.type.' . $action;
@@ -854,7 +854,7 @@ class TracRPC
                 break;
             case 'get':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a version.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a version.');
                 }
 
                 $method = 'ticket.version.get';
@@ -872,10 +872,10 @@ class TracRPC
             case 'update':
             case 'create':
                 if ($name === '') {
-                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a version.");
+                    throw new \InvalidArgumentException('Parameter $name empty. Please specify a version.');
                 }
                 if (!is_array($attr)) {
-                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a version.");
+                    throw new \InvalidArgumentException('Parameter $attr empty. Please specify a version.');
                 }
 
                 $method = ('ticket.version.' . $action);
@@ -934,7 +934,7 @@ class TracRPC
     public function getWikiTextToHTML($text = '')
     {
         if ($text === '') {
-            throw new \InvalidArgumentException("Parameter $text empty. Please specify a text.");
+            throw new \InvalidArgumentException('Parameter $text empty. Please specify a text.');
         }
 
         $this->_addRequest( 'wiki.wikiToHTML', $text);
