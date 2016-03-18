@@ -7,7 +7,13 @@ use TracRPC\TracRPC;
 class TracRPCTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var TracRPC
+     * We use a public Trac server for testing the requests. No mocks.
+     */
+    private $tracURL = 'https://trac-hacks.org/';    
+    //private $tracURL = 'https://josm.openstreetmap.de/';
+         
+    /**
+     * @var TracRPC\TracRPC (subject under test)
      */
     protected $trac;
 
@@ -20,6 +26,11 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
         if (false === extension_loaded('curl')) {
             $this->markTestSkipped('This test requires the PHP extension "cURL".');
         }
+        
+        // we use the jsonrpc endpoint by default
+        $url = $this->tracURL.'jsonrpc';
+        
+        $this->trac = new \TracRPC\TracRPC($url);
     }
 
     /**
@@ -30,103 +41,506 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
     {
         unset($this->trac);
     }
-
-    public function testMethod_Constructor_setsProperties()
+ 
+    public function test_Constructor_RPC_Request_Without_ContentType()
     {
-        $this->trac = new TracRPC(
-            'http://trac.clansuite.com/login/jsonrpc',
-            array(
-                'username' => 'user',
-                'password' => 'password',
-                'multiCall' => '1',
-                'json_decode' => '1'
-            )
-        );
-
-        $this->assertEquals('http://trac.clansuite.com/login/jsonrpc', $this->trac->tracURL);
-        $this->assertEquals('user', $this->trac->username);
-        $this->assertEquals('password', $this->trac->password);
-        $this->assertTrue($this->trac->multiCall);
-        $this->asserttrue($this->trac->json_decode);
+        $url = $this->tracURL.'rpc';
+        $this->trac = new TracRPC($url);         
+        $response = $this->trac->getApiVersion();
+        
+        $this->assertSame("No protocol matching Content-Type 'application/' at path '/rpc'", $response);
+    }
+    
+    public function test_Constructor_RPC_Request_With_Set_ContentType_JSON()
+    {
+        $url = $this->tracURL.'rpc';
+        $this->trac = new TracRPC($url);        
+        $this->trac->setContentType('json');        
+        $response = $this->trac->getApiVersion();
+            
+        $this->assertNotNull($response);
+        $this->assertTrue(is_array($response));        
+    }
+    
+    public function test_Constructor_RPC_Request_With_Set_ContentType_XML()
+    {
+        $url = $this->tracURL.'rpc';
+        $this->trac = new TracRPC($url);
+        $this->trac->setContentType('xml');   
+        
+        $response = $this->trac->getApiVersion();
+       
+        $this->assertNotNull($response);
+        $this->assertTrue(is_array($response));
+    }
+    
+    public function test_Constructor_JSONRPC_Request()
+    {
+        $url = $this->tracURL.'jsonrpc';
+        $this->trac = new TracRPC($url);
+        
+        // implict test of _setContentTypeByURL()
+        $this->assertSame('json', $this->trac->content_type);
+        
+        $response = $this->trac->getApiVersion(); 
+        $this->assertNotNull($response);
+        $this->assertTrue(is_array($response));
+    }
+    
+    public function test_Constructor_XMLRPC_Request()
+    {
+        $url = $this->tracURL.'xmlrpc';
+        $this->trac = new TracRPC($url); 
+        $response = $this->trac->getApiVersion();       
+        $this->assertNotNull($response);
+        $this->assertTrue(is_array($response));
     }
 
-    /**
-     * Not a mock. It's a live request.
-     *
+    public function test_Constructor_setProperties()
+    {
+        $url = 'http://a.trac.url/';
+        
+        $params = array(
+            'username' => 'user',
+            'password' => 'password',
+            'multiCall' => '1',
+            'json_decode' => '1'
+        );
+            
+        $this->trac = new TracRPC($url, $params);
+
+        $this->assertEquals($url, $this->trac->tracURL);
+        $this->assertEquals($params['username'], $this->trac->username);
+        $this->assertEquals($params['password'], $this->trac->password);
+        $this->assertTrue($this->trac->multiCall);
+        $this->assertTrue($this->trac->json_decode);
+    }
+    
+    public function test_property_setters()
+    {             
+        // setContentType
+        $content_type = 'json';
+        $this->trac->setContentType($content_type);
+        $this->assertSame($content_type, $this->trac->content_type); 
+        
+        // setJsonDecode
+        $json_decode = true;
+        $this->trac->setJsonDecode($json_decode);
+        $this->assertTrue($this->trac->json_decode); 
+        
+        // setMultiCall
+        $multiCall = true;
+        $this->trac->setMultiCall($multiCall);
+        $this->assertTrue($this->trac->multiCall); 
+        
+        // setPassword
+        $password = 'password';
+        $this->trac->setPassword($password);
+        $this->assertSame($password, $this->trac->password);
+        
+        // setTracURL
+        $url = 'http://your.trac.url/';
+        $this->trac->setTracURL($url);
+        $this->assertSame($url, $this->trac->tracURL);
+                        
+        // setUser
+        $username = 'john';    
+        $this->trac->setUser($username);
+        $this->assertSame($username, $this->trac->username);
+    }
+    
+    public function test_property_jsonDecode_false()
+    {        
+        $url = $this->tracURL.'jsonrpc';
+        $this->trac = new TracRPC($url);         
+        $this->trac->setJsonDecode(false);
+        $response = $this->trac->getApiVersion();
+        var_dump($response);     
+        $this->assertFalse($response);        
+        $this->assertSame('{"id": 1, "result": [1, 1, 5], "error": null}', $response);
+    }
+
+    /**     
      * @expectedException Exception
      * @expectedExceptionMessage You are trying an authenticated access without providing username and password.
      */
-    public function testMethod_Constructor_WithoutCredentials()
-    {
-        // request to "/login" without credentials
-        $this->trac = new TracRPC('http://trac.clansuite.com/login/jsonrpc');
-        $response = $this->trac->getWikiPage('ClansuiteTeam');
+    public function test_Constructor_TestLoginWithoutCredentials()
+    {        
+        $this->trac = new TracRPC($this->tracURL . 'login/jsonrpc');
+        
+        $response = $this->trac->getWikiPage('HackIndex');
+        //var_dump($response);
         unset($response);
     }
 
-    /**
-     * Not a mock. It's a live request.
-     */
-    public function testMethod_Constructor_doRequest()
+    public function test_Constructor_doRequest()
     {
-        $this->trac = new TracRPC('http://trac.clansuite.com/jsonrpc');
-        $response = $this->trac->getWikiPage('ClansuiteTeam');
-
+        $response = $this->trac->getWikiPage('HackIndex');  
+        
         $this->assertNotNull($response);
-        $this->assertTrue(is_string($response));
-        $this->assertContains('Clansuite Team', $response);
+        $this->assertTrue(is_string($response));        
         unset($response);
     }
-
-    /**
-     * Not a mock. It's a live request.
-     */
-    public function testMethod_request_milestone_GetALL()
+    
+    public function test_MultiCall_Request()
     {
-        $this->trac = new TracRPC('http://trac.clansuite.com/jsonrpc');
-        $response = $this->trac->getTicketMilestone();
+        $this->trac->setMultiCall(true);
+        
+        $ticket      = $this->trac->getTicket('10000');
+        $attachments = $this->trac->getTicketAttachments('list', '10000');
+        
+        $this->trac->doRequest();
 
+        $ticket      = $this->trac->getResponse($ticket);
+        $attachments = $this->trac->getResponse($attachments);
+        
+        $this->assertNotNull($ticket);
+        $this->assertNotNull($attachments);
+    }
+        
+    public function test_getRecentChangedWikiPages()
+    {
+        // no datetime set
+        $response = $this->trac->getRecentChangedWikiPages();        
+        $this->assertNotNull($response);
+        
+        // datetime set
+        $time = time();
+        $response = $this->trac->getRecentChangedWikiPages($time);        
+        $this->assertNotNull($response);        
+    }
+    
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_getWikiPage_emptyName_throwsException()
+    {      
+        // throws exception, when name is empty
+        $name = '';
+        $response = $this->trac->getWikiPage($name);
+        $this->expectException('\InvalidArgumentException');
+    }
+    
+    public function test_getWikiPage()
+    {
+        // raw true = HTML
+        $name = 'HackIndex'; $version = '6'; $raw = true;
+        $response = $this->trac->getWikiPage($name, $version, $raw);
+        $this->assertNotNull($response);        
+        $this->assertContains('= Trac Hacks', $response);
+        
+        // raw false = non HTML
+        $name = 'HackIndex'; $version = '6'; $raw = false;
+        $response = $this->trac->getWikiPage($name, $version, $raw);
+        $this->assertNotNull($response);
+        $this->assertContains('<h1 id="TracHacks">Trac Hacks', $response);
+                              
+        // wiki.getPage
+        $name = 'HackIndex'; $version = '0'; $raw = true;
+        $response = $this->trac->getWikiPage($name, $version, $raw);
+        $this->assertNotNull($response);
+        $this->assertContains('= Trac Hacks', $response); 
+        
+        // wiki.getPageHTML
+        $name = 'HackIndex'; $version = '0'; $raw = false;
+        $response = $this->trac->getWikiPage($name, $version, $raw);
+        $this->assertNotNull($response);
+        $this->assertContains('= Trac Hacks', $response); 
+        
+        // wiki.getPageVersion
+        $name = 'HackIndex'; $version = '2'; $raw = true;
+        $response = $this->trac->getWikiPage($name, $version, $raw);
+        $this->assertNotNull($response);
+        $this->assertContains('= Trac Hacks', $response);       
+    }
+    
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_getWikiPageInfo_emptyName_throwsException()
+    {
+        // throws exception, when name is empty
+        $name = '';
+        $response = $this->trac->getWikiPageInfo($name);
+        $this->expectException('\InvalidArgumentException');
+    }
+    
+    public function test_getWikiPageInfo()
+    {
+        // wiki.getPageInfo
+        $name = 'HackIndex'; $version = 0;
+        $response = $this->trac->getWikiPageInfo($name, $version);
+        $this->assertNotNull($response);
+        
+        // wiki.getPageInfoVersion
+        $name = 'HackIndex'; $version = 1;
+        $response = $this->trac->getWikiPageInfo($name, $version);
+        $this->assertNotNull($response);        
+    }
+
+    public function test_GetTicketMilestone_GetALL()
+    {
+        $response = $this->trac->getTicketMilestone();
+        //var_dump($response);
         $this->assertNotNull($response);
         $this->assertTrue(is_array($response));
         $this->assertTrue(array_key_exists('Triage | Neuzuteilung',array_flip($response)));
         unset($response);
     }
 
-    /**
-     * Not a mock. It's a live request.
-     */
-    public function testMethod_request_milestone_GetOne()
+    public function test_GetTicketMilestone_GetOne()
     {
-        $this->trac = new TracRPC('http://trac.clansuite.com/jsonrpc');
-        $response = $this->trac->getTicketMilestone('get', 'Clansuite 0.2.2');
+        $response = $this->trac->getTicketMilestone('get', 'Release');
 
         $this->assertNotNull($response);
         $this->assertTrue(is_object($response));
-
-        $real_response = self::objectToArray($response);
-
-        $this->assertContains('Gettext', $real_response['description']);
+        $responseArray = self::objectToArray($response);
+        $this->assertContains('Gettext', $responseArray['description']);
         unset($response);
     }
-
+    
     /**
-     * Not a mock. It's a live request.
+     * @expectedException InvalidArgumentException
      */
-    public function testMethod_request_milestone_GetOne_GetDatetime()
+    public function test_GetTicketMilestone_GetOne_emptyName_throwsException()
     {
-        $this->trac = new TracRPC('http://trac.clansuite.com/jsonrpc');
+        $name = '';
+        $response = $this->trac->getTicketMilestone('get', $name);
+        //$this->expectException('\InvalidArgumentException');
+    }
+
+    public function test_GetTicketMilestone_GetOne_GetDatetime()
+    {
         $response = $this->trac->getTicketMilestone('get', 'Clansuite 0.2.2');
 
         $this->assertNotNull($response);
         $this->assertTrue(is_object($response));
-
-        $real_response = self::objectToArray($response);
-
+        $responseArray = self::objectToArray($response);
         // datetime contains a string like "012-02-17T17:00:00"
-        $this->assertContains('T', $real_response['due']['1']);
+        $this->assertContains('T', $responseArray['due']['1']);
         unset($response);
     }
+    
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_getTicket_emptyID_throwsException()
+    {
+        $id = '';
+        $response = $this->trac->getTicket($id);              
+        //$this->expectException('\InvalidArgumentException');
+    }
+    
+    public function test_getTicket()
+    {
+        $id = '10000';
+        $response = $this->trac->getTicket($id);
+              
+        $this->assertNotNull($response);
+        $this->assertEquals('Allow to edit the screenshot before attaching', $response['3']['summary']);
+    }
+    
+    public function test_getTicketSeverity($action = 'get_all', $name = '', $attr = '')
+    {
+        $action = 'get_all'; $name = ''; $attr = '';
+        $response = $this->trac->getTicketSeverity($action, $name, $attr);
+        $this->assertNotNull($response);
+    }
+    
+    public function test_getTicketFields()
+    {
+        $response = $this->trac->getTicketFields();        
+        $this->assertNotNull($response);
+        $this->assertEquals('Priority', $response['6']['label']);
+    }
+    
+    public function test_getTicketChangelog_empty_name_throwsException()
+    {
+        $id = ''; $when = 0;
+        $response = $this->trac->getTicketChangelog($id, $when);
+        $this->expectException();
+    }
+    
+    public function test_getTicketChangelog()
+    {
+        $id = '10000'; $when = 0;
+        $response = $this->trac->getTicketChangelog($id, $when);
+        $this->assertNotNull($response);
+    }
+    
+    public function test_getTicketActions_empty_name_throwsException()
+    {
+        $id = '';
+        $response = $this->trac->getTicketActions($id);
+        $this->expectException();
+    }
+    
+    public function test_getTicketActions()
+    {
+        $id = '10000';
+        $response = $this->trac->getTicketActions($id);
+        $this->assertNotNull($response);
+    }
+    
+    public function test_getWikiAttachments_empty_name_throwsException()
+    {
+        $action = 'list'; $name = ''; $file = 'avatar.gif';
+        $response = $this->trac->getWikiAttachments($action, $name, $file);
+        $this->expectException();
+    }    
+   
+    public function test_getWikiAttachments_action_get_empty_file_throwsException()
+    {
+        $action = 'get'; $name = 'abc'; $file = '';
+        $response = $this->trac->getWikiAttachments($action, $name, $file);
+        $this->expectException();
+    }
+    
+    public function test_getWikiAttachments()
+    {
+        $action = 'list'; $name = 'WikiStart'; $file = 'avatar.gif';
+        $response = $this->trac->getWikiAttachments($action, $name, $file);
+        //var_dump($response);
+        $this->assertNotNull($response);
+    }
+    
+    // ##### Ticket #####
+    
+    public function test_getTicketAttachments_empty_id_throwsException()
+    {
+        $action = 'list'; $id = ''; $file = ''; $desc = ''; $replace = true;
+        $response = $this->trac->getTicketAttachments($action, $id, $file, $desc, $replace);
+        $this->expectException();
+    }
+    
+    public function test_getTicketAttachments()
+    {
+        $action = 'list'; $id = '10000'; $file = ''; $desc = ''; $replace = true;
+        $response = $this->trac->getTicketAttachments($action, $id, $file, $desc, $replace);
+        $this->assertNotNull($response);
+    }
+    
+    public function test_getTicketAttachments_action_get_empty_file_throwsException()
+    {
+        $action = 'get'; $id = '10000'; $file = ''; $desc = ''; $replace = true;
+        $response = $this->trac->getTicketAttachments($action, $id, $file, $desc, $replace);
+        $this->expectException();
+    }
+    
+    public function test_getWikiUpdate_empty_name_throwsException()
+    {
+        $action = 'create'; $name = ''; $page = ''; $data = array();
+        $response = $this->trac->getWikiUpdate($action, $name, $page, $data);
+        $this->expectException();
+    }
+    
+    public function test_getWikiUpdate()
+    {
+        $action = 'create'; $name = 'HackIndex'; $page = ''; $data = array();
+        $response = $this->trac->getWikiUpdate($action, $name, $page, $data);
+        $this->assertNotNull($response);
+    }
+    
+    public function test_getTicketSearch()
+    {
+        // ticket.query
+        $response = $this->trac->getTicketSearch("status=new");
+        $this->assertNotNull($response);
+    }
+        
+    public function test_getRecentChangedTickets($date = 0)
+    {
+        // ticket.getRecentChanges - date false
+        $response = $this->trac->getRecentChangedTickets();
+        $this->assertNotNull($response);
+        
+        // ticket.getRecentChanges - date numeric
+        $response = $this->trac->getRecentChangedTickets(time());
+        $this->assertNotNull($response);
+    }
 
+    /*public function getWikiUpdate()
+    {    
+        //$action = 'create', $name = '', $page = '', $data = array()
+        $response = $this->trac->getWikiUpdate($action, $name, $page, $data);
+        $this->assertNotNull($response);
+    }*/
+    
+    public function test_getApiVersion()
+    {
+        $response =  $this->trac->getApiVersion();
+        
+        $this->assertNotNull($response);        
+        $this->assertTrue(is_array($response));
+        $this->assertTrue(count($response) === 3);            
+    }
+    
+    public function test_getWikiPages()
+    {
+        $response = $this->trac->getWikiPages(); // getAllPages
+        
+        $this->assertNotNull($response); 
+        $this->assertNotEquals(0, count($response));
+        $this->assertSame('WikiExtrasPlugin', $response[0]);
+    }
+    
+    public function test_getWikiTextToHTML()
+    {
+        $text = '= test_header =';
+        $response = $this->trac->getWikiTextToHTML($text); 
+        
+        $this->assertNotNull($response); 
+        $this->assertEquals("<h1 id=\"test_header\">test_header</h1>", $response);        
+    }
+    
+    public function test_getSearchFilters()
+    {
+        $response = $this->trac->getSearchFilters();
+        $this->assertNotNull($response); 
+        $this->assertNotEquals(0, is_array($response));
+        $this->assertSame('Tickets', $response[0][1]);
+        $this->assertSame('Changesets', $response[1][1]);
+    }
+    
+    public function test_getTicketVersion()
+    {
+        $action = 'get_all'; $name = ''; $attr = array();
+        $response = $this->trac->getTicketVersion($action, $name, $attr);
+        $this->assertNotNull($response); 
+    }
+    
+    public function test_getTicketVersion_empty_name_throwsException()
+    {
+        $action = 'get'; $name = ''; $attr = array();
+        $response = $this->trac->getTicketVersion($action, $name, $attr);
+        $this->expectException();
+    }
+    
+    public function test_getTicketStatus()
+    {
+        $response = $this->trac->getTicketStatus();
+        $this->assertNotNull($response); 
+    }
+    
+    public function test_getSearch()
+    {
+        // without filter
+        $query = 'screenshot';
+        $filter = '';
+        $response = $this->trac->getSearch($query, $filter);
+        
+        $this->assertNotNull($response); 
+        $this->assertTrue(is_array($response));
+        
+        // with filter
+        $query = 'screenshot';
+        $filter = 'wiki';
+        $response = $this->trac->getSearch($query, $filter);
+        
+        $this->assertNotNull($response); 
+        $this->assertTrue(is_array($response));
+    }
+    
     /**
      * Converts an object into an array.
      * Handles __jsonclass__ subobject properties, too!
@@ -136,22 +550,18 @@ class TracRPCTest extends \PHPUnit_Framework_TestCase
      * into
      * ( key => value )
      *
-     * @param  type $d
-     * @return type
+     * @param  object $d
+     * @return array
      */
-    public static function objectToArray($d = null)
+    private static function objectToArray($d = null)
     {
-        /**
-         * Turn object properties into array.
-         */
+        // turn object properties into array        
         if (is_object($d)) {
             $d = get_object_vars($d);
         }
 
-        /**
-         * loop over all former "properties", which might be
-         * objects and convert them to.
-         */
+        // iterate over all former "properties", 
+        // which might be objects and convert them
         foreach ($d as $key => $value) {
             if ($key == '__jsonclass__') {
                 $d = $value; #@todo sub-array transformation

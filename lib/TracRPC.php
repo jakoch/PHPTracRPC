@@ -9,9 +9,14 @@ namespace TracRPC;
  * Trac is a project management and bug/issue tracking system.
  * @link http://trac.edgewall.org/
  *
- * Trac by itself does not provide an API. Therefor the XmlRpcPlugin has to be installed.
+ * Trac by itself does not provide an API. Therefore the XmlRpcPlugin has to be installed.
  * Trac then provides anonymous and authenticated access to the API via two protocols XML-RPC and JSON-RPC.
  * @http://trac-hacks.org/wiki/XmlRpcPlugin/
+ * 
+ * You may find an overview of the available  here:
+ * https://trac-hacks.org/rpc#Methods
+ * 
+ * These RPC methods are abstracted into PHP method calls to make direct requests easier.
  */
 class TracRPC
 {
@@ -45,6 +50,8 @@ class TracRPC
         }
 
         $this->tracURL = $tracURL;
+        
+        $this->_setContentTypeFromURL($tracURL);
 
         if ((array) $params === $params and count($params) > 0) {
             $this->username = isset($params['username']) ? $params['username'] : '';
@@ -86,8 +93,8 @@ class TracRPC
      */
     public function getWikiPage($name = '', $version = 0, $raw = true)
     {
-        if ($name == '') {
-            return false;
+        if ($name === '') {
+            throw new \InvalidArgumentException("Parameter $name is empty. Please specify the WikiPage name you want to fetch.");
         }
 
         if ($version == 0) {
@@ -116,8 +123,8 @@ class TracRPC
      */
     public function getWikiPageInfo($name = '', $version = 0)
     {
-        if ($name == '') {
-            return false;
+        if ($name === '') {
+            throw new \InvalidArgumentException("Parameter $name is empty. Please specify the WikiPage name you want to fetch.");
         }
 
         if ($version == 0) {
@@ -168,7 +175,7 @@ class TracRPC
      */
     public function getTicket($id = '')
     {
-        if ($id == '') {
+        if ($id === '') {
             return false;
         }
 
@@ -198,8 +205,8 @@ class TracRPC
      */
     public function getTicketChangelog($id = '', $when = 0)
     {
-        if ($id == '') {
-            return false;
+        if ($id === '') {
+            throw new \InvalidArgumentException("Parameter $id empty.");
         }
 
         $this->_addRequest( 'ticket.changeLog', array($id, $when));
@@ -215,8 +222,8 @@ class TracRPC
      */
     public function getTicketActions($id = '')
     {
-        if ($id == '') {
-            return false;
+        if ($id === '') {
+            throw new \InvalidArgumentException("Parameter $id empty.");
         }
 
         $this->_addRequest( 'ticket.getActions', $id);
@@ -241,8 +248,8 @@ class TracRPC
      */
     public function getWikiAttachments($action = 'list', $name = '', $file = '')
     {
-        if ($name == '') {
-            return false;
+        if ($name === '') {
+            throw new \InvalidArgumentException("Parameter $name empty.");
         }
 
         $params = array($name);
@@ -253,16 +260,16 @@ class TracRPC
                 $method = 'wiki.listAttachments';
                 break;
             case 'get':
-                if ($file == '') {
-                    return false;
+                if ($file === '') {
+                    throw new \InvalidArgumentException("Parameter $file empty.");
                 }
 
                 $method = 'wiki.getAttachment';
                 $params[] = $file;
                 break;
             case 'delete':
-                if ($file == '') {
-                    return false;
+                if ($file === '') {
+                    throw new \InvalidArgumentException("Parameter $file empty.");
                 }
 
                 $method = 'wiki.deleteAttachment';
@@ -309,8 +316,8 @@ class TracRPC
      */
     public function getTicketAttachments($action = 'list', $id = '', $file = '', $desc = '', $replace = true)
     {
-        if ($id == '') {
-            return false;
+        if ($id === '') {
+            throw new \InvalidArgumentException("Parameter $id empty.");
         }
 
         $params = array($id);
@@ -321,16 +328,16 @@ class TracRPC
                 $method = 'ticket.listAttachments';
                 break;
             case 'get':
-                if ($file == '') {
-                    return false;
+                if ($file === '') {
+                    throw new \InvalidArgumentException("Parameter $file empty.");
                 }
 
                 $method = 'ticket.getAttachment';
                 $params[] = $file;
                 break;
             case 'delete':
-                if ($file == '') {
-                    return false;
+                if ($file === '') {
+                    throw new \InvalidArgumentException("Parameter $file empty.");
                 }
 
                 $method = 'ticket.deleteAttachment';
@@ -373,8 +380,8 @@ class TracRPC
      */
     public function getWikiUpdate($action = 'create', $name = '', $page = '', $data = array())
     {
-        if ($name == '') {
-            return false;
+        if ($name === '') {
+            throw new \InvalidArgumentException("Parameter $name empty.");
         }
 
         switch ($action) {
@@ -431,8 +438,8 @@ class TracRPC
                 );
                 break;
             case 'delete':
-                if ($id == '') {
-                    return false;
+                if ($id === '') {
+                    throw new \InvalidArgumentException("Parameter $id empty.");
                 }
 
                 $method = 'ticket.delete';
@@ -514,8 +521,8 @@ class TracRPC
                 $method = 'ticket.component.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty.");
                 }
 
                 $method = 'ticket.component.get';
@@ -532,8 +539,11 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or !is_array($attr)) {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty.");
+                }
+                if (!is_array($attr)) {
+                    throw new \InvalidArgumentException("Parameter $attr empty.");
                 }
 
                 $method = 'ticket.component.' . $action;
@@ -567,8 +577,8 @@ class TracRPC
                 $method = 'ticket.milestone.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a milestone.");
                 }
 
                 $method = 'ticket.milestone.get';
@@ -576,8 +586,8 @@ class TracRPC
 
                 break;
             case 'delete':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a milestone.");
                 }
 
                 $method = 'ticket.milestone.delete';
@@ -620,8 +630,8 @@ class TracRPC
                 $method = 'ticket.priority.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a priority.");
                 }
 
                 $method = 'ticket.priority.get';
@@ -629,8 +639,8 @@ class TracRPC
 
                 break;
             case 'delete':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a priority.");
                 }
 
                 $method = 'ticket.priority.delete';
@@ -638,8 +648,11 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or $attr == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a priority.");
+                }
+                if ($attr === '') {
+                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a priority.");
                 }
 
                 $method = 'ticket.priority.' . $action;
@@ -673,8 +686,8 @@ class TracRPC
                 $method = 'ticket.resolution.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a resolution.");
                 }
 
                 $method = 'ticket.resolution.get';
@@ -682,8 +695,8 @@ class TracRPC
 
                 break;
             case 'delete':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a resolution.");
                 }
 
                 $method = 'ticket.resolution.delete';
@@ -691,8 +704,11 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or $attr == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a resolution.");
+                }
+                if ($attr === '') {
+                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify attributes.");
                 }
 
                 $method = 'ticket.resolution.' . $action;
@@ -726,8 +742,8 @@ class TracRPC
                 $method = 'ticket.severity.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a severity.");
                 }
 
                 $method = 'ticket.severity.get';
@@ -735,8 +751,8 @@ class TracRPC
 
                 break;
             case 'delete':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a severity.");
                 }
 
                 $method = 'ticket.severity.delete';
@@ -744,8 +760,11 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or $attr == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a severity.");
+                }
+                if ($attr === '') {
+                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a severity.");
                 }
 
                 $method = 'ticket.severity.' . $action;
@@ -778,8 +797,8 @@ class TracRPC
                 $method = 'ticket.type.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a type.");
                 }
 
                 $method = 'ticket.type.get';
@@ -787,8 +806,8 @@ class TracRPC
 
                 break;
             case 'delete':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a type.");
                 }
 
                 $method = 'ticket.type.delete';
@@ -796,8 +815,11 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or $attr == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a type.");
+                }
+                if ($attr === '') {
+                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a type.");
                 }
 
                 $method = 'ticket.type.' . $action;
@@ -831,8 +853,8 @@ class TracRPC
                 $method = 'ticket.version.getAll';
                 break;
             case 'get':
-                if ($name == '') {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a version.");
                 }
 
                 $method = 'ticket.version.get';
@@ -840,7 +862,7 @@ class TracRPC
 
                 break;
             case 'delete':
-                if ($name == '') {
+                if ($name === '') {
                     return false;
                 }
 
@@ -849,8 +871,11 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or !is_array($attr)) {
-                    return false;
+                if ($name === '') {
+                    throw new \InvalidArgumentException("Parameter $name empty. Please specify a version.");
+                }
+                if (!is_array($attr)) {
+                    throw new \InvalidArgumentException("Parameter $attr empty. Please specify a version.");
                 }
 
                 $method = ('ticket.version.' . $action);
@@ -895,7 +920,7 @@ class TracRPC
             $params[1] = $filter;
         }
 
-        $this->_addRequest( 'search.getSearchFilters', $params);
+        $this->_addRequest( 'search.performSearch', $params);
 
         return $this->_getReturnValue();
     }
@@ -908,8 +933,8 @@ class TracRPC
      */
     public function getWikiTextToHTML($text = '')
     {
-        if ($text == '') {
-            return false;
+        if ($text === '') {
+            throw new \InvalidArgumentException("Parameter $text empty. Please specify a text.");
         }
 
         $this->_addRequest( 'wiki.wikiToHTML', $text);
@@ -918,7 +943,8 @@ class TracRPC
     }
 
     /**
-     * Get all search filter
+     * Get all search filters.
+     * Its a list of search filters with each element in the form (name, description).
      *
      * @return mixed The result of the request or the integer id on a multicall. false on error.
      */
@@ -988,7 +1014,7 @@ class TracRPC
      */
     protected function _addRequest( $method = '', $args = array(), $id = '')
     {
-        if ($method == '') {
+        if ($method === '') {
             return false;
         }
 
@@ -1037,6 +1063,40 @@ class TracRPC
     }
 
     /**
+     *
+     * The JSON-RPC protocol gets used when sending
+     * a 'Content-Type': 'application/json' header request to:
+     *
+     * Anonymous access
+     *      http://trac.example.com/rpc
+     *      http://trac.example.com/jsonrpc
+     * Authenticated access
+     *      http://trac.example.com/login/rpc
+     *      http://trac.example.com/login/jsonrpc
+     *
+     * The XML-RPC protocol gets used when sending
+     * a 'Content-Type': 'application/xml' or 'text/xml' header request to:
+     *
+     * Anonymous access
+     *      http://trac.example.com/rpc
+     *      http://trac.example.com/xmlrpc
+     * Authenticated access
+     *      http://trac.example.com/login/rpc
+     *      http://trac.example.com/login/xmlrpc
+     * 
+     * if URL ends with "/rpc" we can not differentiate between XML and JSON for the content-type.
+     * you need to define "content-type" in $params or via setter. it defaults to "json".
+     */
+    protected function _setContentTypeFromURL($url)
+    {        
+        if (strpos($url, 'jsonrpc') !== false) {
+            $this->content_type = 'json';
+        } elseif (strpos($url, 'xmlrpc') !== false) {
+            $this->content_type = 'xml';
+        } 
+    }
+    
+    /**
      * Make the request using CURL.
      *
      * @return bool true is a successful CURL request. false CURL isn't installed or the url or payload is empty.
@@ -1045,11 +1105,11 @@ class TracRPC
     protected function _doCurlRequest()
     {
         if (empty($this->tracURL)) {
-            exit('Provide the URL to the Trac Env you want to query.');
+            throw new \InvalidArgumentException('Provide the URL to the Trac Env you want to query.');
         }
 
         if (empty($this->request)) {
-            exit('No valid Request.');
+            throw new \InvalidArgumentException('No valid Request. Check the request parameters.');
         }
 
         $ch = curl_init();
@@ -1058,43 +1118,10 @@ class TracRPC
         /**
          * Set correct HttpHeader Content Type
          * depending on the requested content type via tracURL.
-         *
-         * The JSON-RPC protocol gets used when sending
-         * a 'Content-Type': 'application/json' header request to:
-         *
-         * Anonymous access
-         *
-         *      http://trac.example.com/rpc
-         *      http://trac.example.com/jsonrpc
-         *
-         * Authenticated access
-         *
-         *      http://trac.example.com/login/rpc
-         *      http://trac.example.com/login/jsonrpc
-         *
-         * The XML-RPC protocol gets used when sending
-         * a 'Content-Type': 'application/xml' or 'text/xml' header request to:
-         *
-         * Anonymous access
-         *
-         *      http://trac.example.com/rpc
-         *      http://trac.example.com/xmlrpc
-         *
-         * Authenticated access
-         *
-         *      http://trac.example.com/login/rpc
-         *      http://trac.example.com/login/xmlrpc
+         * 
          */
-        // if URL ends with "/rpc" we can not differentiate between XML and JSON for the content-type.
-        // you need to define "content-type" in $params or via setter. it defaults to "json".
-        if (strpos($this->tracURL, '/rpc') !== false) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->content_type));
-        } elseif (strpos($this->tracURL, 'jsonrpc') !== false) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        } elseif (strpos($this->tracURL, 'xmlrpc') !== false) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
-        }
-
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->content_type));
+        
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
@@ -1130,6 +1157,8 @@ class TracRPC
 
         $response = trim(curl_exec($ch));
 
+        //var_dump($response);
+        
         if (curl_errno($ch) > 0) {
             $this->error = curl_error($ch);
         }
@@ -1252,6 +1281,8 @@ class TracRPC
      */
     public function setTracURL($tracURL = '')
     {
+        $this->_setContentTypeFromURL($tracURL);
+        
         $this->tracURL = $tracURL;
 
         return $this;
@@ -1379,7 +1410,8 @@ class TracRPC
      *
      * @return boolean|integer|object
      */
-    protected function _getReturnValue() {
+    protected function _getReturnValue()
+    {
         if( $this->multiCall === true ) {
             return $this->request_id;
         }
