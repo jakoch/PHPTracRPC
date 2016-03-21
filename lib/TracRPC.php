@@ -78,7 +78,7 @@ class TracRPC
             $date = array('datetime', date("o-m-d\TH:i:s+00:00", $date));
         }
 
-        $this->_addRequest( 'wiki.getRecentChanges', array(array('__jsonclass__' => $date)));
+        $this->_addRequest('wiki.getRecentChanges', array(array('__jsonclass__' => $date)));
 
         return $this->_getReturnValue();
     }
@@ -99,15 +99,15 @@ class TracRPC
 
         if ($version == 0) {
             if ($raw === true) {
-                $this->_addRequest( 'wiki.getPage', array($name));
+                $this->_addRequest('wiki.getPage', array($name));
             } else {
-                $this->_addRequest( 'wiki.getPageHTML', array($name));
+                $this->_addRequest('wiki.getPageHTML', array($name));
             }
         } else {
             if ($raw === true) {
-                $this->_addRequest( 'wiki.getPageVersion', array($name, $version));
+                $this->_addRequest('wiki.getPageVersion', array($name, $version));
             } else {
-                $this->_addRequest( 'wiki.getPageHTMLVersion', array($name, $version));
+                $this->_addRequest('wiki.getPageHTMLVersion', array($name, $version));
             }
         }
 
@@ -128,9 +128,9 @@ class TracRPC
         }
 
         if ($version == 0) {
-            $this->_addRequest( 'wiki.getPageInfo', array($name));
+            $this->_addRequest('wiki.getPageInfo', array($name));
         } else {
-            $this->_addRequest( 'wiki.getPageInfoVersion', array($name, $version));
+            $this->_addRequest('wiki.getPageInfoVersion', array($name, $version));
         }
 
         return $this->_getReturnValue();
@@ -143,7 +143,7 @@ class TracRPC
      */
     public function getWikiPages()
     {
-        $this->_addRequest( 'wiki.getAllPages');
+        $this->_addRequest('wiki.getAllPages');
 
         return $this->_getReturnValue();
     }
@@ -162,7 +162,7 @@ class TracRPC
             $date = array('datetime', date("o-m-d\TH:i:s+00:00", $date));
         }
 
-        $this->_addRequest( 'ticket.getRecentChanges', array(array('__jsonclass__' => $date)));
+        $this->_addRequest('ticket.getRecentChanges', array(array('__jsonclass__' => $date)));
 
         return $this->_getReturnValue();
     }
@@ -179,7 +179,7 @@ class TracRPC
             throw new \InvalidArgumentException('Parameter $id is empty.');
         }
 
-        $this->_addRequest( 'ticket.get', $id);
+        $this->_addRequest('ticket.get', $id);
 
         return $this->_getReturnValue();
     }
@@ -191,7 +191,7 @@ class TracRPC
      */
     public function getTicketFields()
     {
-        $this->_addRequest( 'ticket.getTicketFields');
+        $this->_addRequest('ticket.getTicketFields');
 
         return $this->_getReturnValue();
     }
@@ -209,7 +209,7 @@ class TracRPC
             throw new \InvalidArgumentException('Parameter $id empty.');
         }
 
-        $this->_addRequest( 'ticket.changeLog', array($id, $when));
+        $this->_addRequest('ticket.changeLog', array($id, $when));
 
         return $this->_getReturnValue();
     }
@@ -226,14 +226,13 @@ class TracRPC
             throw new \InvalidArgumentException('Parameter $id empty.');
         }
 
-        $this->_addRequest( 'ticket.getActions', $id);
+        $this->_addRequest('ticket.getActions', $id);
 
         return $this->_getReturnValue();
     }
 
     /**
      * Perform requests relating to attachments for wiki pages.
-
      * Get a list of attachments for a wiki page.
      * Get an attachment for a wiki page.
      * Delete an attachment for a wiki page.
@@ -292,14 +291,13 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
 
     /**
      * Perform requests relating to attachments for tickets.
-
      * Get a list of attachments for a ticket.
      * Get an attachment for a ticket.
      * Delete an attachment for a ticket.
@@ -362,7 +360,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -400,7 +398,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -447,7 +445,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -493,7 +491,7 @@ class TracRPC
             return false;
         }
 
-        $this->_addRequest( 'ticket.query', $query);
+        $this->_addRequest('ticket.query', $query);
 
         return $this->_getReturnValue();
     }
@@ -551,7 +549,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -604,7 +602,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -660,7 +658,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -716,7 +714,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -772,7 +770,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -827,7 +825,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -882,7 +880,7 @@ class TracRPC
                 break;
         }
 
-        $this->_addRequest( $method, $params);
+        $this->_addRequest($method, $params);
 
         return $this->_getReturnValue();
     }
@@ -894,7 +892,7 @@ class TracRPC
      */
     public function getTicketStatus()
     {
-        $this->_addRequest( 'ticket.status.getAll');
+        $this->_addRequest('ticket.status.getAll');
 
         $this->_getReturnValue();
     }
@@ -920,7 +918,7 @@ class TracRPC
             $params[1] = $filter;
         }
 
-        $this->_addRequest( 'search.performSearch', $params);
+        $this->_addRequest('search.performSearch', $params);
 
         return $this->_getReturnValue();
     }
@@ -937,7 +935,7 @@ class TracRPC
             throw new \InvalidArgumentException('Parameter $text empty. Please specify a text.');
         }
 
-        $this->_addRequest( 'wiki.wikiToHTML', $text);
+        $this->_addRequest('wiki.wikiToHTML', $text);
 
         return $this->_getReturnValue();
     }
@@ -950,7 +948,7 @@ class TracRPC
      */
     public function getSearchFilters()
     {
-        $this->_addRequest( 'search.getSearchFilters');
+        $this->_addRequest('search.getSearchFilters');
 
         return $this->_getReturnValue();
     }
@@ -962,7 +960,7 @@ class TracRPC
      */
     public function getApiVersion()
     {
-        $this->_addRequest( 'system.getAPIVersion');
+        $this->_addRequest('system.getAPIVersion');
 
         return $this->_getReturnValue();
     }
@@ -977,7 +975,7 @@ class TracRPC
     public function doRequest($method = '', $args = array())
     {
         if ($method != '') {
-            $this->_addRequest( $method, $args);
+            $this->_addRequest($method, $args);
         }
 
         if (empty($this->request)) {
@@ -985,7 +983,7 @@ class TracRPC
         }
 
         if ($this->multiCall === true) {
-            $this->_addRequest( 'system.multicall');
+            $this->_addRequest('system.multicall');
         }
         
         // create JSON request
@@ -997,7 +995,7 @@ class TracRPC
         
         // create XML request
         if ($this->content_type === 'xml') {
-            if(!extension_loaded('xmlrpc')) {
+            if (!extension_loaded('xmlrpc')) {
                 throw new \RuntimeException('PHP Extension "xmlrpc" is required. Please activate in php.ini.');                
             }
             
@@ -1006,12 +1004,11 @@ class TracRPC
 
         if ($this->_doCurlRequest() === true) {
             
-            if($this->content_type === 'xml') {
+            if ($this->content_type === 'xml') {
                 //var_dump($this->response);
                 $this->response = \xmlrpc_decode($this->response);
                 //var_dump($this->response);
-            } 
-            elseif ($this->content_type === 'json' && $this->json_decode === true) {
+            } elseif ($this->content_type === 'json' && $this->json_decode === true) {
                 $this->response = json_decode($this->response);
                 $this->parseResult();
             }  
@@ -1030,7 +1027,7 @@ class TracRPC
      * @param  string $id     The id to set to the call.
      * @return bool Always true.
      */
-    protected function _addRequest( $method = '', $args = array(), $id = '')
+    protected function _addRequest($method = '', $args = array(), $id = '')
     {
         if ($method === '') {
             return false;
@@ -1104,6 +1101,7 @@ class TracRPC
      * 
      * if URL ends with "/rpc" we can not differentiate between XML and JSON for the content-type.
      * you need to define "content-type" in $params or via setter. it defaults to "json".
+     * @param string $url
      */
     protected function _setContentTypeFromURL($url)
     {        
@@ -1142,7 +1140,7 @@ class TracRPC
          * depending on the requested content type via tracURL.
          * 
          */
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->content_type));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/' . $this->content_type));
         
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -1197,7 +1195,7 @@ class TracRPC
      * timestamp. Base64 decodes the value.
      *
      * @param array|object $response
-     * @return bool true on a non-empty result and false if it is empty.
+     * @return null|boolean true on a non-empty result and false if it is empty.
      */
     public function parseResult($response = array())
     {       
@@ -1269,7 +1267,7 @@ class TracRPC
      * Set the property user.
      *
      * @param string $username
-     * @return object TracRPC
+     * @return TracRPC TracRPC
      */
     public function setUser($username = '')
     {
@@ -1282,7 +1280,7 @@ class TracRPC
      * Set the property password.
      *
      * @param string $password
-     * @return object TracRPC
+     * @return TracRPC TracRPC
      */
     public function setPassword($password = '')
     {
@@ -1295,7 +1293,7 @@ class TracRPC
      * Set the property tracURL
      *
      * @param string $tracURL
-     * @return object TracRPC
+     * @return TracRPC TracRPC
      */
     public function setTracURL($tracURL = '')
     {
@@ -1324,7 +1322,7 @@ class TracRPC
      * Only needed for URLs using "/rpc".
      *
      * @param string $type The content-type. Defaults to json.
-     * @return object TracRPC
+     * @return TracRPC TracRPC
      */
     public function setContentType($type = 'json')
     {
@@ -1337,7 +1335,7 @@ class TracRPC
      * Set the property json_decode.
      *
      * @param bool $json_decode
-     * @return object TracRPC
+     * @return TracRPC TracRPC
      */
     public function setJsonDecode($json_decode = false)
     {
@@ -1362,12 +1360,12 @@ class TracRPC
         // response is an array
         if (is_array($this->response)) {
             
-            if($this->content_type === 'xml') { // @todo this returns a single response for now
+            if ($this->content_type === 'xml') { // @todo this returns a single response for now
                 return $this->response;
             }
 
             // response is an array - but no id requested
-            if($id === false) {
+            if ($id === false) {
                 return current($this->response);
             }
 
@@ -1381,7 +1379,7 @@ class TracRPC
                 $ret = array();
                 foreach ($id as $key) {
                     if (false === isset($this->response[$key])) {
-                       continue;
+                        continue;
                     }
                     $ret[$key] = $this->response[$key];
                 }
@@ -1390,7 +1388,7 @@ class TracRPC
         }
         
         // raw json string, not decoded
-        if(is_string($this->response)) {
+        if (is_string($this->response)) {
             return $this->response;
         }
 
@@ -1439,11 +1437,11 @@ class TracRPC
      */
     protected function _getReturnValue()
     {
-        if( $this->multiCall === true ) {
+        if ($this->multiCall === true) {
             return $this->request_id;
         }
 
-        if( $this->doRequest() === true ) {            
+        if ($this->doRequest() === true) {            
             return $this->getResponse();
         }
 
