@@ -13,7 +13,7 @@ namespace TracRPC;
  * Trac then provides anonymous and authenticated access to the API via two protocols XML-RPC and JSON-RPC.
  * @http://trac-hacks.org/wiki/XmlRpcPlugin/
  *
- * You may find an overview of the available  here:
+ * You may find an overview of the available request methods here:
  * https://trac-hacks.org/rpc#Methods
  *
  * These RPC methods are abstracted into PHP method calls to make direct requests easier.
