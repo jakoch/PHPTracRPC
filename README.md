@@ -121,39 +121,3 @@ var_dump($ticket, $attachments);
 24. getWikiTextToHTML($text = '')
 25. getSearchFilters()
 26. getApiVersion()
-
-### Example: Ajax Request to Trac's JSON-RPC Interface
-
-```
-<html>
-<head>
-   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-   <script>
-      $(document).ready(function(){
-         $.ajax({
-            url: 'http://trac.domain.com/jsonrpc',
-            data: JSON.stringify( {method:'ticket.milestone.get', params:['Milstone 1.2.3']} ),
-            type: "POST",
-            contentType: "application/json",
-            dataType:"json",
-          success: function (result) {
-                 alert("OK");
-          },
-          error: function (err,status,thrown) {
-                 alert("Error: " + err + "! STATUS: " + status + "! " + thrown );
-          },
-          complete: function (xhr,status) {
-                 alert('Completo!  Status: '+ status);
-                 data = $.parseJSON(xhr.responseText);
-                 console.info(data);
-                 /*alert(data);*/
-          }
-         });
-      });
-  </script>
-</head>
-<body>
-  <h1>Ajax Request to Trac's JSON-RPC Interface</h1>
-</body>
-</html>
-```
