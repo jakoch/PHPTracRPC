@@ -12,10 +12,10 @@ namespace TracRPC;
  * Trac by itself does not provide an API. Therefore the XmlRpcPlugin has to be installed.
  * Trac then provides anonymous and authenticated access to the API via two protocols XML-RPC and JSON-RPC.
  * @http://trac-hacks.org/wiki/XmlRpcPlugin/
- * 
+ *
  * You may find an overview of the available  here:
  * https://trac-hacks.org/rpc#Methods
- * 
+ *
  * These RPC methods are abstracted into PHP method calls to make direct requests easier.
  */
 class TracRPC
@@ -50,7 +50,7 @@ class TracRPC
         }
 
         $this->tracURL = $tracURL;
-        
+
         $this->_setContentTypeFromURL($tracURL);
 
         if ((array) $params === $params and count($params) > 0) {
@@ -233,7 +233,7 @@ class TracRPC
 
     /**
      * Perform requests relating to attachments for wiki pages.
-
+     *
      * Get a list of attachments for a wiki page.
      * Get an attachment for a wiki page.
      * Delete an attachment for a wiki page.
@@ -299,7 +299,7 @@ class TracRPC
 
     /**
      * Perform requests relating to attachments for tickets.
-
+     *
      * Get a list of attachments for a ticket.
      * Get an attachment for a ticket.
      * Delete an attachment for a ticket.
@@ -595,7 +595,7 @@ class TracRPC
                 break;
             case 'update':
             case 'create':
-                if ($name == '' or !is_array($attr)) {
+                if ($name == '' || !is_array($attr)) {
                     return false;
                 }
 
@@ -987,38 +987,38 @@ class TracRPC
         if ($this->multiCall === true) {
             $this->_addRequest( 'system.multicall');
         }
-        
+
         // create JSON request
         if (is_array($this->request) === true & $this->content_type === 'json') {
             $this->request = json_encode(array_pop($this->request));
             // Replace empty arrays with structs(objects, in PHP parlance)
             $this->request = str_replace('[]', '{}', $this->request);
         }
-        
+
         // create XML request
         if ($this->content_type === 'xml') {
             if(!extension_loaded('xmlrpc')) {
-                throw new \RuntimeException('PHP Extension "xmlrpc" is required. Please activate in php.ini.');                
+                throw new \RuntimeException('PHP Extension "xmlrpc" is required. Please activate in php.ini.');
             }
-            
+
             $this->request = \xmlrpc_encode_request($this->request[0]['method'], $this->request[0]['params']);
         }
 
         if ($this->_doCurlRequest() === true) {
-            
+
             if($this->content_type === 'xml') {
                 //var_dump($this->response);
                 $this->response = \xmlrpc_decode($this->response);
                 //var_dump($this->response);
-            } 
+            }
             elseif ($this->content_type === 'json' && $this->json_decode === true) {
                 $this->response = json_decode($this->response);
                 $this->parseResult();
-            }  
-            
+            }
+
             return true;
-        } 
-        
+        }
+
         return false;
     }
 
@@ -1101,19 +1101,19 @@ class TracRPC
      * Authenticated access
      *      http://trac.example.com/login/rpc
      *      http://trac.example.com/login/xmlrpc
-     * 
+     *
      * if URL ends with "/rpc" we can not differentiate between XML and JSON for the content-type.
      * you need to define "content-type" in $params or via setter. it defaults to "json".
      */
     protected function _setContentTypeFromURL($url)
-    {        
+    {
         if (strpos($url, 'jsonrpc') !== false) {
             $this->content_type = 'json';
         } elseif (strpos($url, 'xmlrpc') !== false) {
             $this->content_type = 'xml';
-        } 
+        }
     }
-    
+
     /**
      * Make the request using CURL.
      *
@@ -1129,7 +1129,7 @@ class TracRPC
         if (empty($this->request)) {
             throw new \InvalidArgumentException('No valid Request. Check the request parameters.');
         }
-        
+
         if (empty($this->content_type)) {
             throw new \InvalidArgumentException('Please set the content type (xml or json) for this request.');
         }
@@ -1140,10 +1140,10 @@ class TracRPC
         /**
          * Set correct HttpHeader Content Type
          * depending on the requested content type via tracURL.
-         * 
+         *
          */
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->content_type));
-        
+
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
@@ -1167,7 +1167,7 @@ class TracRPC
          * Determine if this is an authenticated access, then set user credentials accordingly.
          */
         if (strpos($this->tracURL, 'login') !== false) {
-            if (empty($this->username) or empty($this->password)) {
+            if (empty($this->username) || empty($this->password)) {
                 throw new \Exception(
                     'You are trying an authenticated access without providing username and password.'
                 );
@@ -1178,7 +1178,7 @@ class TracRPC
         }
 
         $this->response = trim(curl_exec($ch));
-        
+
         if (curl_errno($ch) > 0) {
             $this->error = curl_error($ch);
         }
@@ -1200,7 +1200,7 @@ class TracRPC
      * @return bool true on a non-empty result and false if it is empty.
      */
     public function parseResult($response = array())
-    {       
+    {
         if (empty($response)) {
             $response = $this->getResponse();
 
@@ -1210,11 +1210,11 @@ class TracRPC
         if (false === is_object($response) and false === is_array($response)) {
             return false;
         }
-        
+
         if (($response->result !== null) and is_array($response->result) && $this->content_type === 'xml') {
             return; // single call on xml for now
         }
-                
+
         if (($response->result !== null) and is_array($response->result)) {
             foreach ($response->result as $key => $resp) {
                 if (isset($resp->result) === true) {
@@ -1222,7 +1222,7 @@ class TracRPC
                     continue;
                 }
 
-                if (is_array($resp) === true or is_object($resp) === true) {
+                if (is_array($resp) === true || is_object($resp) === true) {
                     $values = array();
                     foreach ($resp as $r_key => $value) {
                         if ($r_key === '__jsonclass__') {
@@ -1300,7 +1300,7 @@ class TracRPC
     public function setTracURL($tracURL = '')
     {
         $this->_setContentTypeFromURL($tracURL);
-        
+
         $this->tracURL = $tracURL;
 
         return $this;
@@ -1361,7 +1361,7 @@ class TracRPC
 
         // response is an array
         if (is_array($this->response)) {
-            
+
             if($this->content_type === 'xml') { // @todo this returns a single response for now
                 return $this->response;
             }
@@ -1388,7 +1388,7 @@ class TracRPC
                 return $ret;
             }
         }
-        
+
         // raw json string, not decoded
         if(is_string($this->response)) {
             return $this->response;
@@ -1443,7 +1443,7 @@ class TracRPC
             return $this->request_id;
         }
 
-        if( $this->doRequest() === true ) {            
+        if( $this->doRequest() === true ) {
             return $this->getResponse();
         }
 
