@@ -11,10 +11,10 @@ namespace TracRPC;
  *
  * Trac by itself does not provide an API. Therefore the XmlRpcPlugin has to be installed.
  * Trac then provides anonymous and authenticated access to the API via two protocols XML-RPC and JSON-RPC.
- * @http://trac-hacks.org/wiki/XmlRpcPlugin/
+ * @link http://trac-hacks.org/wiki/XmlRpcPlugin/
  *
  * You may find an overview of the available request methods here:
- * https://trac-hacks.org/rpc#Methods
+ * @link https://trac-hacks.org/rpc#Methods
  *
  * These RPC methods are abstracted into PHP method calls to make direct requests easier.
  */
